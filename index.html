@@ -135,7 +135,8 @@ form.say button{background:var(--c,var(--mint));color:var(--ink);font-weight:800
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @keyframes hop{50%{transform:translateY(-14px)}}
 .catsvg.no{animation:shake .3s 3}
-.stage .item.rej{opacity:.45;filter:grayscale(1) drop-shadow(0 0 8px var(--bad))}
+.stage .item.rej{filter:grayscale(1) drop-shadow(0 0 8px var(--bad));animation:rejfade .9s forwards}
+@keyframes rejfade{0%{opacity:.85}100%{opacity:0}}
 .rot{position:fixed;inset:0;z-index:40;background:rgba(20,18,43,.98);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px}
 .rot .e{font-size:72px;transform:rotate(-90deg)}
 .rot .w{font-family:var(--display);font-size:24px}
@@ -429,7 +430,7 @@ function level1(app,L){
       side=1-side;setTimeout(place,500);
       if(eaten>=3)setTimeout(()=>win(L,`${tries} משפטים · ${Math.round((Date.now()-t0)/1000)} שניות`,"מה עושה התוספת בהתחלה? ומה עושה התוספת בסוף?"),700)}
     else if(it.w==="זיל"){catState(ui.cat,"no",900);sfx.no();vib([80,50,80]);flash("bad");pop("🚫",it.x*W,it.y*H);ui.speak("נו טול… רהזיל!");ui.log("🐟 קטן הגיע לבוק","בוק לא אוכל 🚫 (הדג חזר)");
-      it.ban=performance.now()+1500;it.el.classList.add("rej");setTimeout(()=>it.el.classList.remove("rej"),1500);
+      it.ban=Infinity;it.el.classList.add("rej");setTimeout(()=>{items=items.filter(x=>x!==it);it.el.remove()},900);
       const dx=it.x-mx,dy=it.y-my,d=Math.hypot(dx,dy)||1;it.drag=false;it.vx=dx/d*1.1;it.vy=dy/d*1.1}
     else if(it.w==="שלט"){catState(ui.cat,"sleepy",900);ui.speak(it.big?"רהשלט? נו טול.":"שלט? נו טול.");sfx.no();ui.log(it.big?"📕 גדול הגיע":"📕 הגיע","בוק מפהק");}
     else{catState(ui.cat,"scared",700);ui.speak(it.big?"רהמיר!!":"מיר!");vib([30,30,30]);ui.log(it.big?"🧒 גדול הגיע":"🧒 הגיע","בוק נבהל");}
