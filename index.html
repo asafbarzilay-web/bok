@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content">
 <title>בוק · השפה של החתול</title>
 <meta name="theme-color" content="#1E1B3A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +49,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-of
 .goal .t{font-family:var(--display);font-size:22px;line-height:1.15}
 .prog{font-family:var(--display);font-size:22px;color:var(--c,var(--mint));font-variant-numeric:tabular-nums}
 
-.stage{position:relative;height:min(46vh,380px);border-radius:22px;background:var(--stage,#26224a);overflow:hidden;touch-action:none;transition:background .6s}
+body.typing .sens,body.typing .log{display:none}
+.stage{position:relative;height:clamp(150px,calc(var(--vvh,100vh)*.46),380px);border-radius:22px;background:var(--stage,#26224a);overflow:hidden;touch-action:none;transition:background .6s}
 .stage .cat{position:absolute;width:150px;height:150px;transition:left .6s,top .6s,transform .3s}
 .stage .item{position:absolute;font-size:34px;line-height:1;transform:translate(-50%,-50%);pointer-events:auto;user-select:none;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 .stage .item.big{font-size:60px}
@@ -166,6 +167,12 @@ const h=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const store={get(k,d){try{const v=localStorage.getItem("bok:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("bok:"+k,JSON.stringify(v))}catch(e){}}};
 const SIM=/[?&#]sim\b/.test(location.href);
+// keep the stage visible when the on-screen keyboard is open
+const VV=window.visualViewport;
+const setVV=()=>document.documentElement.style.setProperty("--vvh",(VV?VV.height:innerHeight)+"px");
+setVV();(VV||window).addEventListener("resize",setVV);
+addEventListener("focusin",e=>{if(e.target.matches&&e.target.matches("input,textarea"))document.body.classList.add("typing")});
+addEventListener("focusout",()=>document.body.classList.remove("typing"));
 // normalize Hebrew input: strip spaces/punct, final letters -> regular
 const FINALS={"ך":"כ","ם":"מ","ן":"נ","ף":"פ","ץ":"צ"};
 const norm=s=>s.replace(/[\s\-·.,!?'"׳״]/g,"").replace(/[ךםןףץ]/g,c=>FINALS[c]);
