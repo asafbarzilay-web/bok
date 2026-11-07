@@ -302,7 +302,7 @@ function home(){
       h("div",{class:"s",title:"החושים בשלב"},L.senses)))),
     h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים."),
     h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
-    h("p",{class:"note",style:"opacity:.6"},"גרסה 7 · "+new Date("2026-11-07T22:05:00+02:00").toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})),
+    h("p",{class:"note",style:"opacity:.6"},"גרסה 8 · "+new Date("2026-11-07T22:05:00+02:00").toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})),
     SIM?h("p",{class:"note"},"מצב סימולציה פעיל: החיישנים מופעלים מכפתורים."):null
   );
   catState(cat,"happy");
@@ -536,7 +536,7 @@ function level3(app,L){
   // level 3 needs no typing: replace the text field with a "new bowl" button (no keyboard)
   ui.form.hidden=true;
   ui.form.after(h("button",{class:"btn ghost",onclick:()=>{seq=[];render();ui.stage.querySelectorAll(".dish").forEach(d=>d.remove());ui.speak("רהעוגה?");ui.log("קערה חדשה","קערה ריקה")}},"🥣 קערה חדשה"));
-  gate(app,"מטבח עם חיישנים","מראים למצלמה האחורית צבעים (כרטיסי מצרכים), מנערים את הטלפון, והופכים אותו על השולחן כדי לאפות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
+  gate(app,"מטבח עם חיישנים","בשלב הזה בוק מרגיש דרך המצלמה ודרך התנועה של הטלפון. הדפדפן יבקש רשות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
   let colorHeld=null,since=0,armed=true,lastShake=0,ovenStart=0;
   const tick=setInterval(()=>{if(!alive||won)return;const now=performance.now();
     const col=S.mot.faceDown?null:camColor();
