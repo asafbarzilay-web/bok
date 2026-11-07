@@ -302,6 +302,7 @@ function home(){
       h("div",{class:"s",title:"החושים בשלב"},L.senses)))),
     h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים."),
     h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
+    h("p",{class:"note",style:"opacity:.6"},"גרסה 7 · "+new Date("2026-11-07T22:05:00+02:00").toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})),
     SIM?h("p",{class:"note"},"מצב סימולציה פעיל: החיישנים מופעלים מכפתורים."):null
   );
   catState(cat,"happy");
