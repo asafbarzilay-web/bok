@@ -276,11 +276,13 @@ function home(){
       h("div",{},h("h3",{},L.name),h("div",{class:"g"},L.goal),done[L.id]?h("div",{class:"done"},"✓ הושלם"):null),
       h("div",{class:"s",title:"החושים בשלב"},L.senses)))),
     h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים."),
+    h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
     SIM?h("p",{class:"note"},"מצב סימולציה פעיל: החיישנים מופעלים מכפתורים."):null
   );
   catState(cat,"happy");
 }
 function start(id){
+  if(cur&&cur.stop)cur.stop();cur=null;document.querySelectorAll(".win").forEach(w=>w.remove());
   const L=LEVELS.find(l=>l.id===id);
   const app=$("#app");app.innerHTML="";app.className="wrap game";app.style.setProperty("--c",L.c);
   cur=[null,level1,level2,level3][id](app,L);
@@ -288,6 +290,7 @@ function start(id){
 function shell(app,L,extra){
   const prog=h("div",{class:"prog"},"");
   app.append(h("div",{class:"top"},h("button",{class:"back",onclick:home,"aria-label":"חזרה"},"→"),
+    h("button",{class:"back",onclick:()=>start(L.id),"aria-label":"התחלה מחדש",title:"התחלה מחדש"},"↻"),
     h("div",{class:"goal"},h("div",{class:"k"},L.sub),h("div",{class:"t"},L.goal)),prog));
   const stage=h("div",{class:"stage"});app.append(stage);
   const say=h("div",{class:"say"},"…");const bubble=h("div",{class:"bubble"},h("span",{class:"who"},"בוק:"),say);app.append(bubble);
