@@ -300,7 +300,7 @@ function shell(app,L,extra){
   return{prog,stage,say,sens,inp,form,list,cat,
     speak(t){say.textContent=t;catState(cat,"talk",700)},
     log(a,r){const li=h("li",{},h("span",{class:"a"},a),h("span",{class:"ar"},"←"),h("span",{class:"r"},r));list.prepend(li);while(list.children.length>40)list.lastChild.remove()},
-    onText(fn){form.addEventListener("submit",e=>{e.preventDefault();const raw=inp.value.trim();if(!raw)return;inp.value="";fn(raw,norm(raw))})}};
+    onText(fn){form.addEventListener("submit",e=>{e.preventDefault();const raw=inp.value.trim();if(!raw)return;inp.value="";inp.blur();fn(raw,norm(raw))})}};
 }
 function sensorChip(ic,label){const bar=h("i");const v=h("span",{class:"v"},"");const el=h("div",{class:"sen",title:label},h("span",{class:"ic"},ic),h("span",{class:"bar"},bar),v);
   return{el,set(p,txt,on){bar.style.width=clamp(p*100,0,100)+"%";v.textContent=txt||"";el.classList.toggle("on",!!on)}}}
@@ -491,10 +491,9 @@ function level3(app,L){
   const camC=sensorChip("📷","צבע"),shC=sensorChip("🫨","ניעור"),ovC=sensorChip("🔽","תנור");ui.sens.append(camC.el,shC.el,ovC.el);
   ui.prog.textContent="🎂";ui.speak("רהעוגה?");
   const render=()=>{bowl.innerHTML="";transcribe(seq).forEach(w=>bowl.append(h("span",{class:"tok"},w)))};
-  ui.onText((raw,n)=>{
-    if(n==="נקי"||n==="אפס"||n==="חדש"){seq=[];render();ui.log(raw,"קערה חדשה");return}
-    ui.speak("נו מילים… טרר! חום!");ui.log(raw,"בוק מצביע על הקערה");});
-  ui.inp.placeholder="כתבו 'חדש' לקערה ריקה";
+  // level 3 needs no typing: replace the text field with a "new bowl" button (no keyboard)
+  ui.form.hidden=true;
+  ui.form.after(h("button",{class:"btn ghost",onclick:()=>{seq=[];render();ui.stage.querySelectorAll(".dish").forEach(d=>d.remove());ui.speak("רהעוגה?");ui.log("קערה חדשה","קערה ריקה")}},"🥣 קערה חדשה"));
   gate(app,"מטבח עם חיישנים","מראים למצלמה האחורית צבעים (כרטיסי מצרכים), מנערים את הטלפון, והופכים אותו על השולחן כדי לאפות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
   let colorHeld=null,since=0,armed=true,lastShake=0,ovenStart=0;
   const tick=setInterval(()=>{if(!alive||won)return;const now=performance.now();
