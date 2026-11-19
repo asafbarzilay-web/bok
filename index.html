@@ -59,6 +59,12 @@ body.typing .sens,body.typing .log{display:none}
 .hints .hh{color:var(--sun);font-weight:700;font-size:13px}
 .hints ol{margin:4px 0 0;padding:0 18px 0 0;display:grid;gap:3px}
 .hints li.new{animation:wp 1s 2}
+.candles{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);display:flex;gap:6px}
+.candles .cd{display:flex;flex-direction:column;align-items:center;font-size:30px;line-height:1}
+.candles .fl{font-size:20px;transition:opacity .25s,transform .25s}
+.candles .fl.out{opacity:0;transform:translateY(-10px) scale(.4)}
+.candles.wind .fl{animation:flick .15s infinite alternate}
+@keyframes flick{to{transform:skewX(-25deg) scale(.85)}}
 .ball{position:absolute;font-size:44px;line-height:1;transform:translate(-50%,-50%);transition:left .5s,top .3s}
 .wall{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.08);border-radius:12px;padding:6px 10px;font-size:14px;line-height:1.6;color:#E7E5F7}
 .wall b{font-weight:800;color:#fff}
@@ -313,7 +319,7 @@ function home(){
       h("div",{class:"s"},"")))),
     h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים. נתקעתם? כל דקה וחצי נפתח רמז."),
     h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3,4].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
-    h("p",{class:"note",style:"opacity:.6"},"גרסה 9 · 19.11"),
+    h("p",{class:"note",style:"opacity:.6"},"גרסה 10 · 19.11"),
     SIM?h("p",{class:"note"},"מצב סימולציה פעיל: החיישנים מופעלים מכפתורים."):null
   );
   catState(cat,"happy");
@@ -392,6 +398,7 @@ function simPanel(btns){
     if(x==="clap")p.append(h("button",{onclick:()=>{S.mic.claps++;S.mic.lastClap=performance.now()}},"👏 מחיאה"));
     if(x==="shake")p.append(h("button",{onclick:()=>{S.mot.shake=performance.now()}},"🫨 ניעור"));
     if(x==="face")add("🔽 הפוך",()=>{S.mot.faceDown=true},()=>{S.mot.faceDown=false});
+    if(x==="blow")add("💨 נשיפה",()=>{S.mic.blow=true},()=>{S.mic.blow=false});
     if(x==="colors"){[["🟨",[230,200,40]],["🟦",[40,90,220]],["🟥",[220,40,40]],["🟩",[40,180,70]],["⬜ אין",[150,150,140]]].forEach(([l,c])=>p.append(h("button",{onclick:()=>setRGB(...c)},l)))}
   }
   setRGB(150,150,140);
@@ -578,20 +585,21 @@ function levelPlay(app,L){
 /* =========================================================
    LEVEL 4 · עוגה
    ingredients = colours shown to the camera (פלו צהוב · מוז כחול · תיק אדום · ליב ירוק)
-   טרר = shake · חום = phone face-down 2–5s · רהחום = face-down 6s+
-   cake recipe: פלואן · מוז · אלתיק · טרר · רהחום
+   טרר = shake · after mixing, birthday candles appear
+   פוף = short blow on the mic (some candles go out) · רהפוף = long strong blow (all out)
+   cake recipe: פלואן · מוז · אלתיק · טרר · רהפוף
    ========================================================= */
 const ING={yellow:{w:"פלו",e:"🟨"},blue:{w:"מוז",e:"🟦"},red:{w:"תיק",e:"🟥"},green:{w:"ליב",e:"🟩"}};
 function transcribe(seq){ // collapse runs into Bok words: same ingredient twice -> אן
   const out=[];const cnt={};let order=[];
   for(const s of seq){if(s.t==="ing"){if(!(s.c in cnt)){cnt[s.c]=0;order.push(s.c)}cnt[s.c]++}}
   for(const c of order){const w=ING[c].w;out.push(cnt[c]>=2?w+"אן"+(cnt[c]>2?"×"+cnt[c]:""):w)}
-  for(const s of seq){if(s.t==="shake")out.push("טרר");if(s.t==="oven")out.push(s.long?"רהחום":"חום")}
+  for(const s of seq){if(s.t==="shake")out.push("טרר");if(s.t==="blow")out.push(s.long?"רהפוף":"פוף")}
   return out;
 }
 function judge(seq){
   const cnt={yellow:0,blue:0,red:0,green:0};let shakes=0,oven=null,orderOk=true,seenShake=false,seenOven=false;
-  for(const s of seq){if(s.t==="ing"){cnt[s.c]++;if(seenShake||seenOven)orderOk=false}if(s.t==="shake"){shakes++;seenShake=true;if(seenOven)orderOk=false}if(s.t==="oven"){oven=s;seenOven=true}}
+  for(const s of seq){if(s.t==="ing"){cnt[s.c]++;if(seenShake||seenOven)orderOk=false}if(s.t==="shake"){shakes++;seenShake=true;if(seenOven)orderOk=false}if(s.t==="blow"){oven=s;seenOven=true}}
   const tr=transcribe(seq).join(" · ");
   const is=(y,b,r,g)=>cnt.yellow===y&&cnt.blue===b&&cnt.red===r&&cnt.green===g;
   if(is(2,1,0,0)&&shakes>=1&&oven&&oven.long&&orderOk)return{e:"🎂",name:"עוגת יום הולדת!",win:true,tr,say:"רהעוגה!! טול טול!"};
@@ -600,12 +608,12 @@ function judge(seq){
   // hints in Bok
   let say="נו עוגה.";
   if(cnt.red>0)say="אלתיק!!";else if(cnt.yellow<2)say="פלואן!";else if(cnt.yellow>2)say="רהפלו… נו!";else if(cnt.blue!==1)say=cnt.blue?"מוזאן? נו!":"מוז!";else if(cnt.green)say="ליב? נו!";
-  else if(!shakes)say="טרר!";else if(!orderOk)say="טרר… חום. נו חום… טרר!";else if(!oven)say="חום!";else if(!oven.long)say="רהחום!";
-  const e=oven?(oven.long&&!is(2,1,0,0)?"🔥":"🫓"):"🥣";
-  return{e,name:oven?"משהו… אפוי":"עיסה בקערה",tr,say};
+  else if(!shakes)say="טרר!";else if(!orderOk)say="טרר… פוף. נו פוף… טרר!";else if(!oven)say="פוף!";else if(!oven.long)say="רהפוף!";
+  const e=oven?"🫓":"🥣";
+  return{e,name:oven?"משהו… עם נרות כבויים":"עיסה בקערה",tr,say};
 }
 function level3(app,L){
-  const ui=shell(app,L,["colors","shake","face"]);let seq=[],alive=true,t0=Date.now(),attempts=0,won=false;
+  const ui=shell(app,L,["colors","shake","blow"]);let seq=[],alive=true,t0=Date.now(),attempts=0,won=false;
   ui.stage.style.setProperty("--stage","#3a2f2a");
   const catBox=h("div",{class:"cat",style:"right:8px;top:24px;width:120px;height:120px"},ui.cat);ui.stage.append(catBox);
   const camBox=h("div",{class:"cam",hidden:true},h("span",{class:"dot"}));ui.stage.append(camBox);
@@ -613,25 +621,31 @@ function level3(app,L){
   const hint=h("div",{style:"position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);font-size:64px"},"🥣");ui.stage.append(hint);
   // cookbook (few examples, no explanations)
   const book=h("div",{class:"book"},
-    h("div",{class:"row"},h("span",{},"🥞"),h("b",{},"פלו · מוז · טרר · חום")),
+    h("div",{class:"row"},h("span",{},"🥞"),h("b",{},"פלו · מוז · טרר · פוף")),
     h("div",{class:"row"},h("span",{},"🥤"),h("b",{},"תיקאן · מוז · טרר")),
-    h("div",{class:"row goalr"},h("span",{},"🎂 ?"),h("b",{},"פלואן · מוז · אלתיק · טרר · רהחום")));
+    h("div",{class:"row goalr"},h("span",{},"🎂 ?"),h("b",{},"פלואן · מוז · אלתיק · טרר · רהפוף")));
   ui.stage.after(book);
-  const camC=sensorChip("📷","צבע"),shC=sensorChip("🫨","ניעור"),ovC=sensorChip("🔽","תנור");ui.sens.append(camC.el,shC.el,ovC.el);
+  const camC=sensorChip("📷","צבע"),shC=sensorChip("🫨","ניעור"),ovC=sensorChip("💨","נשיפה");ui.sens.append(camC.el,shC.el,ovC.el);
+  // birthday candles: appear once the batter is mixed (after טרר), go out when you really blow on the phone
+  const candles=h("div",{class:"candles",hidden:true});const flames=[];
+  for(let i=0;i<5;i++){const f=h("span",{class:"fl"},"🔥");flames.push(f);candles.append(h("span",{class:"cd"},f,h("span",{},"🕯️")))}
+  ui.stage.append(candles);
+  const lightAll=()=>flames.forEach(f=>f.classList.remove("out"));
+  const syncCandles=()=>{const mixed=seq.some(x=>x.t==="shake")&&!seq.some(x=>x.t==="blow");candles.hidden=!mixed;hint.hidden=mixed;if(mixed&&!candles._lit){lightAll();candles._lit=true}if(!mixed)candles._lit=false};
   ui.prog.textContent="🎂";ui.speak("רהעוגה?");
-  ui.idle(n=>{if(won)return;catState(ui.cat,"happy",600);ui.speak(["רהעוגה?","פלו… מוז…?","טרר? חום?"][n%3]);ui.log("שקט…","בוק מחכה לעוגה");if(n%3===2)pulse(book)});
-  const render=()=>{bowl.innerHTML="";transcribe(seq).forEach(w=>bowl.append(h("span",{class:"tok"},w)));ui.poke()};
+  ui.idle(n=>{if(won)return;catState(ui.cat,"happy",600);ui.speak(["רהעוגה?","פלו… מוז…?","טרר? פוף?"][n%3]);ui.log("שקט…","בוק מחכה לעוגה");if(n%3===2)pulse(book)});
+  const render=()=>{bowl.innerHTML="";transcribe(seq).forEach(w=>bowl.append(h("span",{class:"tok"},w)));syncCandles();ui.poke()};
   // level 3 needs no typing: replace the text field with a "new bowl" button (no keyboard)
   ui.form.hidden=true;
   ui.form.after(h("button",{class:"btn ghost",onclick:()=>{seq=[];render();ui.stage.querySelectorAll(".dish").forEach(d=>d.remove());ui.speak("רהעוגה?");ui.log("קערה חדשה","קערה ריקה")}},"🥣 קערה חדשה"));
   ui.hints([
     {t:"📷 בוק רואה צבעים דרך המצלמה",chip:camC,show:()=>camBox.hidden=false},
     {t:"🫨 'טרר' זה לערבב. איך מערבבים עם טלפון?",chip:shC},
-    {t:"🔽 הטלפון יכול להיות תנור. איך מכניסים משהו לתנור?",chip:ovC},
-    {t:"⏱️ כמה זמן הטלפון בתנור? 'רה' זה גדול, אז 'רהחום' זה…"},
+    {t:"🎂 אחרי הערבוב מופיעים נרות. מה עושים לנרות ביום הולדת?",chip:ovC},
+    {t:"💨 'רה' זה גדול, אז 'רהפוף' זה…"},
     {t:"'אל' – זוכרים מרמה 2? ו'אן' – מרמה 1?"}]);
-  gate(app,"יום הולדת לבוק","בוק מרגיש את העולם דרך הטלפון. הדפדפן יבקש רשות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
-  let colorHeld=null,since=0,armed=true,lastShake=0,ovenStart=0;
+  gate(app,"יום הולדת לבוק","בוק מרגיש את העולם דרך הטלפון. הדפדפן יבקש רשות.",["cam","mot","mic"],async r=>{if(S.cam.video){camBox.prepend(S.cam.video)}await calibrate(1000)});
+  let colorHeld=null,since=0,armed=true,lastShake=0,blowStart=0,blowLast=0;
   const tick=setInterval(()=>{if(!alive||won)return;const now=performance.now();
     const col=S.mot.faceDown?null:camColor();
     camBox.querySelector(".dot").style.background=col?{red:"#e33",yellow:"#fd3",green:"#3c6",blue:"#36f"}[col]:"transparent";
@@ -639,16 +653,21 @@ function level3(app,L){
     if(col!==colorHeld){colorHeld=col;since=now;if(!col)armed=true}
     else if(col&&armed&&now-since>700){armed=false;seq.push({t:"ing",c:col});render();sfx.plop();vib(25);ui.log(ING[col].e+" למצלמה","נכנס לקערה: "+ING[col].w)}
     if(S.mot.shake>lastShake+600&&now-S.mot.shake<300&&!S.mot.faceDown){lastShake=S.mot.shake;seq.push({t:"shake"});render();vib(60);ui.log("ניעור","טרר");shC.set(1,"טרר",true);setTimeout(()=>shC.set(0,"",S.mot.on),400)}
-    if(S.mot.faceDown){if(!ovenStart){ovenStart=now;ui.say.textContent="חום…"}const s=(now-ovenStart)/1000;ovC.set(Math.min(1,s/6),s.toFixed(1)+"ש׳",true);if(Math.floor(s*2)!==Math.floor((s-.1)*2))sfx.tick();if(s>=6&&s<6.12)vib(200)}
-    else if(ovenStart){const s=(now-ovenStart)/1000;ovenStart=0;ovC.set(0,"",S.mot.on);
-      if(s<1.5){ui.log("הפיכה קצרה","שום דבר");return}
-      seq.push({t:"oven",long:s>=5.5,sec:s});render();attempts++;serve(s)}
+    // blowing = loud, noisy (no clear pitch) sound into the mic
+    const blowing=S.mic.sim?!!S.mic.blow:(S.mic.rms>Math.max(S.mic.base*4,.04)&&S.mic.clarity<.6);
+    if(blowing){if(!blowStart)blowStart=now;blowLast=now;const s=(now-blowStart)/1000;ovC.set(Math.min(1,s/1.8),"💨",true);
+      if(!candles.hidden){candles.classList.add("wind");const k=Math.min(5,Math.floor(s/1.8*5));flames.forEach((f,i)=>f.classList.toggle("out",i<k))}}
+    else if(blowStart&&now-blowLast>300){const s=(blowLast-blowStart)/1000;blowStart=0;candles.classList.remove("wind");ovC.set(0,"",S.mic.on);
+      if(s<.3)return;
+      if(candles.hidden){ui.log("נשיפה","אין נרות לכבות");return}
+      const long=s>=1.8;flames.forEach((f,i)=>f.classList.toggle("out",long||i<2));
+      seq.push({t:"blow",long,sec:s});render();candles.hidden=false;attempts++;setTimeout(()=>{candles.hidden=true;serve(s)},700)}
   },100);
   function serve(s){const r=judge(seq);
     const d=h("div",{class:"dish"},h("div",{class:"e"},r.e),h("div",{class:"w"},r.name),h("div",{class:"tok"},r.tr),
       h("button",{class:"btn",style:"margin-top:8px",onclick:()=>{d.remove();seq=[];render()}},"קערה חדשה"));
-    ui.stage.append(d);ui.speak(r.say);ui.log("אפייה "+s.toFixed(1)+" שנ׳",r.e+" "+r.name);
-    if(r.win){won=true;catState(ui.cat,"eat happy");setTimeout(()=>win(L,`${attempts} אפיות · ${Math.round((Date.now()-t0)/1000)} שניות`,"מה אומרים 'אן', 'רה' ו'אל' במתכון? ואיך יודעים כמה זמן לאפות?"),1500)}
+    ui.stage.append(d);ui.speak(r.say);ui.log("נשיפה "+s.toFixed(1)+" שנ׳",r.e+" "+r.name);
+    if(r.win){won=true;catState(ui.cat,"eat happy");setTimeout(()=>win(L,`${attempts} ניסיונות · ${Math.round((Date.now()-t0)/1000)} שניות`,"מה אומרים 'אן', 'רה' ו'אל' במתכון? ומה ההבדל בין 'פוף' ל'רהפוף'?"),1500)}
     else{sfx.no();catState(ui.cat,"talk",800)}
   }
   // shake-only dishes (no oven): evaluate when shake happens and sequence matches a drink
