@@ -54,6 +54,12 @@ body.typing .sens,body.typing .log{display:none}
 .stage .cat{position:absolute;width:150px;height:150px;transition:left .6s,top .6s,transform .3s}
 .stage .item{position:absolute;font-size:34px;line-height:1;transform:translate(-50%,-50%);pointer-events:auto;user-select:none;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 .stage .item.big{font-size:60px}
+.stage .item.sm{font-size:20px}
+.hints{background:var(--ink2);border-radius:14px;padding:8px 12px;font-size:14px}
+.hints .hh{color:var(--sun);font-weight:700;font-size:13px}
+.hints ol{margin:4px 0 0;padding:0 18px 0 0;display:grid;gap:3px}
+.hints li.new{animation:wp 1s 2}
+.ball{position:absolute;font-size:44px;line-height:1;transform:translate(-50%,-50%);transition:left .5s,top .3s}
 .wall{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.08);border-radius:12px;padding:6px 10px;font-size:14px;line-height:1.6;color:#E7E5F7}
 .wall b{font-weight:800;color:#fff}
 .meter{position:absolute;left:12px;right:12px;bottom:10px;height:12px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
@@ -193,14 +199,14 @@ const FINALS={"ך":"כ","ם":"מ","ן":"נ","ף":"פ","ץ":"צ"};
 const norm=s=>s.replace(/[\s\-·.,!?'"׳״]/g,"").replace(/[ךםןףץ]/g,c=>FINALS[c]);
 
 /* ======================= sound ======================= */
-let actx=null;
-function beep(f=600,d=.12,type="sine",v=.15){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+d)}catch(e){}}
+let actx=null,lastSfx=0;
+function beep(f=600,d=.12,type="sine",v=.15){lastSfx=performance.now();try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+d)}catch(e){}}
 const sfx={ok:()=>{beep(660,.1);setTimeout(()=>beep(880,.15),90)},no:()=>beep(200,.25,"square",.08),plop:()=>beep(520,.08,"triangle"),win:()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*120)),tick:()=>beep(1200,.03,"square",.04)};
 const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 
 /* ======================= sensors ======================= */
 const S={
-  mic:{on:false,rms:0,pitch:0,clarity:0,base:.01},
+  mic:{on:false,rms:0,pitch:0,clarity:0,base:.01,claps:0,lastClap:0,hi:false},
   cam:{on:false,bright:.5,rgb:[0,0,0],hue:0,sat:0,val:0,video:null,base:.5},
   mot:{on:false,gx:0,gy:0,beta:0,gamma:0,shake:0,faceDown:false,move:0},
   sim:{}
@@ -216,6 +222,9 @@ async function startMic(){
     const buf=new Float32Array(an.fftSize);
     S.mic.on=true;
     (function loop(){an.getFloatTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];const rms=Math.sqrt(s/buf.length);S.mic.rms=S.mic.rms*.6+rms*.4;
+      // clap = sharp loud onset (ignored right after our own beeps)
+      const tn=performance.now(),thr=Math.max(S.mic.base*6,.06);
+      if(rms>thr){if(!S.mic.hi&&tn-S.mic.lastClap>180&&tn-lastSfx>450){S.mic.claps++;S.mic.lastClap=tn}S.mic.hi=true}else if(rms<thr*.5)S.mic.hi=false;
       const p=pitchOf(buf,actx.sampleRate);S.mic.pitch=p.f;S.mic.clarity=p.c;requestAnimationFrame(loop)})();
     return true;
   }catch(e){return false}
@@ -274,10 +283,12 @@ function catState(svg,st,ms){svg.classList.remove("eat","talk","sleepy","asleep"
 
 /* ======================= app shell ======================= */
 const LEVELS=[
-  {id:1,c:"var(--mint)",name:"בוק רעב",goal:"האכילו את בוק ב-3 מנות",senses:"⌨️ 📱",sub:"רמה 1 · מערכת פשוטה"},
-  {id:2,c:"var(--violet)",name:"בוק עייף",goal:"שלחו את בוק לישון",senses:"⌨️ 🎤 📷 📱",sub:"רמה 2 · עם חריג"},
-  {id:3,c:"var(--sun)",name:"יום הולדת לבוק",goal:"אפו לבוק עוגת יום הולדת",senses:"⌨️ 📷 📱",sub:"רמה 3 · כללים בתוך כללים"}
+  {id:1,c:"var(--mint)",name:"בוק רעב",goal:"האכילו את בוק ב-3 מנות",sub:"רמה 1 · מערכת פשוטה"},
+  {id:2,c:"var(--violet)",name:"בוק עייף",goal:"שלחו את בוק לישון",sub:"רמה 2 · עם חריג"},
+  {id:3,c:"var(--coral)",name:"בוק משועמם",goal:"שחקו עם בוק 5 סיבובים",sub:"רמה 3 · פקודות"},
+  {id:4,c:"var(--sun)",name:"יום הולדת לבוק",goal:"אפו לבוק עוגת יום הולדת",sub:"רמה 4 · כללים בתוך כללים"}
 ];
+const HINT_MS=/[?&]fasthints\b/.test(location.href)?3000:90000;
 let cur=null; // current level controller
 // portrait only: lock when possible (Android, fullscreen), otherwise cover the screen in landscape
 const rot=h("div",{class:"rot",hidden:true},h("div",{class:"e"},"📱"),h("div",{class:"w"},"סובבו את הטלפון חזרה לאנכי"));
@@ -299,10 +310,10 @@ function home(){
     h("div",{class:"levels"},LEVELS.map(L=>h("button",{class:"lv",style:"--c:"+L.c,onclick:()=>start(L.id)},
       h("div",{class:"n"},String(L.id)),
       h("div",{},h("h3",{},L.name),h("div",{class:"g"},L.goal),done[L.id]?h("div",{class:"done"},"✓ הושלם"):null),
-      h("div",{class:"s",title:"החושים בשלב"},L.senses)))),
-    h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים."),
-    h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
-    h("p",{class:"note",style:"opacity:.6"},"גרסה 8 · "+new Date("2026-11-07T22:05:00+02:00").toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})),
+      h("div",{class:"s"},"")))),
+    h("p",{class:"note"},"טלפון אחד לזוג. בוחרים רמה לפי האתגר שמתאים לכם. בכל רמה יש מטרה אחת ברורה, ויומן ניסויים שמראה מה עשיתם ומה בוק עשה. מהיומן מגלים את החוקים. נתקעתם? כל דקה וחצי נפתח רמז."),
+    h("button",{class:"btn ghost",onclick:()=>{if(confirm("למחוק את כל ההתקדמות והחוקים שכתבתם ולהתחיל מההתחלה?")){store.set("done",{});[1,2,3,4].forEach(i=>store.set("rules"+i,""));home()}}},"↻ אפסו הכל והתחילו מחדש"),
+    h("p",{class:"note",style:"opacity:.6"},"גרסה 9 · 19.11"),
     SIM?h("p",{class:"note"},"מצב סימולציה פעיל: החיישנים מופעלים מכפתורים."):null
   );
   catState(cat,"happy");
@@ -311,7 +322,7 @@ function start(id){
   if(cur&&cur.stop)cur.stop();cur=null;document.querySelectorAll(".win").forEach(w=>w.remove());
   const L=LEVELS.find(l=>l.id===id);
   const app=$("#app");app.innerHTML="";app.className="wrap game";app.style.setProperty("--c",L.c);
-  cur=[null,level1,level2,level3][id](app,L);chkRot();
+  cur=[null,level1,level2,levelPlay,level3][id](app,L);chkRot();
 }
 function shell(app,L,extra){
   const prog=h("div",{class:"prog"},"");
@@ -327,11 +338,23 @@ function shell(app,L,extra){
   if(SIM){app.append(simPanel(extra||[]))}
   const cat=makeCat();
   // idle nudge: if nothing happens for 10s, Bok does something (fn gets 0,1,2,...)
-  let idleT=0,idleFn=null,idleN=0;
+  let idleT=0,idleFn=null,idleN=0,hintT=0;
   const arm=()=>{clearTimeout(idleT);if(!idleFn)return;idleT=setTimeout(()=>{try{idleFn(idleN++)}catch(e){}arm()},10000)};
   const poke=()=>{idleN=0;arm()};
   ["pointerdown","keydown","input"].forEach(ev=>app.addEventListener(ev,poke,true));
-  return{prog,stage,say,sens,inp,form,list,cat,poke,idle(fn){idleFn=fn;arm()},idleStop(){clearTimeout(idleT);idleFn=null},
+  // timed hints: nothing about senses is shown up front; one hint opens every HINT_MS
+  function hints(listH){
+    listH.forEach(x=>{if(x.chip)x.chip.el.hidden=true});
+    const head=h("div",{class:"hh"}),ol=h("ol");const box=h("div",{class:"hints"},head,ol);sens.after(box);
+    let i=0,next=Date.now()+HINT_MS;
+    const fmt=ms=>{const s=Math.ceil(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+    const step=()=>{if(i>=listH.length){head.textContent="💡 רמזים";clearInterval(hintT);return}
+      const left=next-Date.now();head.textContent="💡 רמז "+(i+1)+" ייפתח בעוד "+fmt(Math.max(0,left));
+      if(left<=0){const x=listH[i++];ol.querySelectorAll(".new").forEach(e=>e.classList.remove("new"));ol.append(h("li",{class:"new"},x.t));
+        if(x.chip)x.chip.el.hidden=false;if(x.show)x.show();sfx.tick();vib(30);next=Date.now()+HINT_MS;step()}};
+    step();hintT=setInterval(step,500);
+  }
+  return{prog,stage,say,sens,inp,form,list,cat,poke,hints,idle(fn){idleFn=fn;arm()},idleStop(){clearTimeout(idleT);idleFn=null;clearInterval(hintT)},
     speak(t){say.textContent=t;catState(cat,"talk",700)},
     log(a,r){const li=h("li",{},h("span",{class:"a"},a),h("span",{class:"ar"},"←"),h("span",{class:"r"},r));list.prepend(li);while(list.children.length>40)list.lastChild.remove()},
     onText(fn){form.addEventListener("submit",e=>{e.preventDefault();const raw=inp.value.trim();if(!raw)return;inp.value="";inp.blur();fn(raw,norm(raw))})}};
@@ -366,6 +389,7 @@ function simPanel(btns){
     if(x==="loud")p.append(h("button",{onclick:()=>{S.mic.rms=.3;S.mic.pitch=0;S.mic.clarity=.1;setTimeout(()=>S.mic.rms=.005,700)}},"📢 רעש"));
     if(x==="hum")add("🎵 זמזום",()=>{S.mic.hum=true},()=>{S.mic.hum=false});
     if(x==="move")p.append(h("button",{onclick:()=>{S.mot.move=6;setTimeout(()=>S.mot.move=0,700)}},"🤚 תזוזה"));
+    if(x==="clap")p.append(h("button",{onclick:()=>{S.mic.claps++;S.mic.lastClap=performance.now()}},"👏 מחיאה"));
     if(x==="shake")p.append(h("button",{onclick:()=>{S.mot.shake=performance.now()}},"🫨 ניעור"));
     if(x==="face")add("🔽 הפוך",()=>{S.mot.faceDown=true},()=>{S.mot.faceDown=false});
     if(x==="colors"){[["🟨",[230,200,40]],["🟦",[40,90,220]],["🟥",[220,40,40]],["🟩",[40,180,70]],["⬜ אין",[150,150,140]]].forEach(([l,c])=>p.append(h("button",{onclick:()=>setRGB(...c)},l)))}
@@ -403,13 +427,18 @@ function level1(app,L){
     sfx.plop();ui.log(raw,(L1WORDS[p.w]).repeat(cnt)+(p.big?" גדול":" קטן"));
     if(p.w==="מיר"&&p.many)ui.speak("מירו?");
   });
-  function spawn(w,big,i){const el=h("div",{class:"item"+(big?" big":"")},L1WORDS[w]);ui.stage.append(el);
+  function spawn(w,big,i){const el=h("div",{class:"item"+(big?" big":w==="זיל"?" sm":"")},L1WORDS[w]);ui.stage.append(el);
     const it={el,w,big,x:.3+Math.random()*.4+i*.05,y:.12+i*.04,vx:(Math.random()-.5)*.1,vy:0};items.push(it);
     // drag fallback (no motion sensor)
     el.addEventListener("pointerdown",e=>{it.drag=true;el.setPointerCapture(e.pointerId)});
     el.addEventListener("pointermove",e=>{if(!it.drag)return;const r=ui.stage.getBoundingClientRect();it.x=(e.clientX-r.left)/r.width;it.y=(e.clientY-r.top)/r.height;it.vx=it.vy=0});
     el.addEventListener("pointerup",()=>it.drag=false)}
-  gate(app,"החזיקו את הטלפון כמו מגש","האוכל מתגלגל לפי הטיית הטלפון. בטלפונים בלי חיישן תנועה אפשר לגרור אותו באצבע.",["mot"],()=>{});
+  ui.hints([
+    {t:"📱 בוק מרגיש כשמטים את הטלפון",chip:tiltC},
+    {t:"בוק לא אוכל כל דג. מה כתוב ביומן?"},
+    {t:"מה קורה כשמוסיפים משהו בתחילת המילה?"},
+    {t:"ומה קורה כשמוסיפים משהו בסוף המילה?"}]);
+  gate(app,"בוק רעב","בוק מרגיש את העולם דרך הטלפון. גלו איך.",["mot"],()=>{});
   let last=performance.now();
   function frame(now){if(!alive)return;const dt=Math.min(.05,(now-last)/1000);last=now;
     const gx=S.mot.gx,gy=S.mot.gy;tiltC.set(Math.min(1,Math.hypot(gx,gy)*1.5),"",S.mot.on);
@@ -461,7 +490,13 @@ function level2(app,L){
     if(n.includes("מיר")){sleep=Math.max(0,sleep-40);catState(ui.cat,"scared",700);ui.speak("מיר!!");ui.log(raw,"בוק נבהל והתעורר");return}
     ui.speak("??");ui.log(raw,"בוק לא מבין");
   });
-  gate(app,"שלושה חושים","בשלב הזה בוק מרגיש אור, קול ותנועה. הדפדפן יבקש רשות למצלמה ולמיקרופון.",["cam","mic","mot"],async r=>{
+  ui.hints([
+    {t:"📷 בוק מרגיש אם יש אור",chip:lightC},
+    {t:"🎤 בוק שומע מה קורה סביבו",chip:micC},
+    {t:"📱 בוק מרגיש אם הטלפון זז",chip:motC},
+    {t:"בוק לא נרדם בלי משהו שהוא אוהב. איזו מילה מרמה 1?"},
+    {t:"לא כל צליל מפריע לבוק. נסו לזמזם 🎵"}]);
+  gate(app,"בוק עייף","בוק מרגיש את העולם דרך הטלפון. הדפדפן יבקש רשות.",["cam","mic","mot"],async r=>{
     ui.speak("…");await calibrate(1200);ui.speak("מיאו. נו נום.");
     if(!r.cam||!r.mic)ui.log("⚠️ חיישן לא זמין","אפשרו מצלמה ומיקרופון בהגדרות הדפדפן");
   });
@@ -488,7 +523,60 @@ function level2(app,L){
 }
 
 /* =========================================================
-   LEVEL 3 · עוגה
+   LEVEL 3 · בוק משועמם (play)
+   words: פים = tilt left · פום = tilt right · טק = one clap
+   reused rules: -אן = many (3 claps) · אל- = without (stay still, no clap)
+   ========================================================= */
+const PLAY=[{w:"פים",k:"L"},{w:"פום",k:"R"},{w:"טק",k:"C1"},{w:"טקאן",k:"C3"},{w:"אלטק",k:"NONE"}];
+const ACT={L:"הטיה שמאלה",R:"הטיה ימינה",C1:"מחיאה אחת",C2:"שתי מחיאות",C3:"מחיאות ×3",NONE:"שקט"};
+function levelPlay(app,L){
+  const ui=shell(app,L,["tilt","clap"]);let score=0,tries=0,t0=Date.now(),alive=true,won=false,ready=false;
+  ui.stage.style.setProperty("--stage","#4a2a33");
+  const catBox=h("div",{class:"cat",style:"left:calc(50% - 75px);bottom:6px"},ui.cat);ui.stage.append(catBox);
+  const ball=h("div",{class:"ball",style:"left:50%;top:22%"},"🧶");ui.stage.append(ball);
+  const tiltC=sensorChip("📱","הטיה"),micC=sensorChip("🎤","קול");ui.sens.append(tiltC.el,micC.el);
+  const upd=()=>ui.prog.textContent=score+"/5";upd();
+  ui.form.hidden=true; // no typing in this level
+  ui.speak("מיאו?");
+  let cmd=null,last=null,rStart=0,clapBase=0,clapN=0,tiltArmed=true,busy=false;
+  function next(same){
+    if(!same){const pool=score<2?PLAY.slice(0,3):PLAY;let c;do{c=pool[Math.floor(Math.random()*pool.length)]}while(pool.length>1&&c===last);cmd=c;last=c}
+    rStart=performance.now();clapBase=S.mic.claps;clapN=0;busy=false;
+    ui.speak(cmd.w+"!");catState(ui.cat,"talk happy",700)}
+  function resolve(act){if(busy||won)return;busy=true;tries++;ui.poke();
+    if(act===cmd.k){score++;upd();sfx.ok();vib(40);catState(ui.cat,"happy",700);ui.speak("טול!");ui.log(ACT[act],"בוק שמח 😺");
+      if(act==="L")ball.style.left="18%";else if(act==="R")ball.style.left="82%";else{ball.style.top="8%";setTimeout(()=>ball.style.top="22%",300)}
+      if(score>=5){won=true;setTimeout(()=>win(L,`${tries} ניסיונות · ${Math.round((Date.now()-t0)/1000)} שניות`,"מה אומרות 'פים', 'פום' ו'טק'? ומה קורה כשמוסיפים 'אן' או 'אל'?"),900);return}
+      setTimeout(()=>{ball.style.left="50%";next(false)},1300)}
+    else{sfx.no();vib([80,50,80]);catState(ui.cat,"no",900);ui.speak("נו! "+cmd.w+"!");ui.log(ACT[act],"בוק: נו! 🙀");setTimeout(()=>next(true),1500)}
+  }
+  ui.hints([
+    {t:"📱 בוק מרגיש כשמטים את הטלפון",chip:tiltC},
+    {t:"🎤 בוק שומע מחיאות כפיים",chip:micC},
+    {t:"'פים' ו'פום' הן מילים של כיוון"},
+    {t:"'אן' – זוכרים מרמה 1?"},
+    {t:"'אל' – זוכרים מרמה 2?"}]);
+  ui.idle(()=>{if(won||!ready)return;ui.speak(cmd.w+"? "+cmd.w+"!");ui.log("שקט…","בוק מחכה")});
+  gate(app,"בוק משועמם","בוק מרגיש את העולם דרך הטלפון. הדפדפן יבקש רשות.",["mic","mot"],async()=>{
+    ui.speak("…");await calibrate(1000);ready=true;next(false)});
+  const tick=setInterval(()=>{if(!alive||won)return;const now=performance.now();
+    const gx=S.mot.gx;tiltC.set(Math.min(1,Math.abs(gx)*1.5),gx<-.45?"⬅":gx>.45?"➡":"",S.mot.on);
+    micC.set(Math.min(1,S.mic.rms*8),now-S.mic.lastClap<300?"👏":"",S.mic.on);
+    if(!ready||busy||!cmd)return;
+    if(Math.abs(gx)<.2)tiltArmed=true;
+    const grace=now-rStart>700;
+    if(grace&&tiltArmed&&Math.abs(gx)>.45){tiltArmed=false;resolve(gx<0?"L":"R");return}
+    const n=S.mic.claps-clapBase;
+    if(!grace){clapBase=S.mic.claps;return}
+    if(n>0&&now-S.mic.lastClap>1100){resolve(n===1?"C1":n===2?"C2":"C3");return}
+    if(cmd.k==="NONE"&&n===0&&now-rStart>4000){resolve("NONE");return}
+    if(n===0&&now-rStart>9000){rStart=now;clapBase=S.mic.claps;ui.speak(cmd.w+"…?");ui.log("שום דבר","בוק מחכה")}
+  },50);
+  return{stop(){alive=false;clearInterval(tick);ui.idleStop()}};
+}
+
+/* =========================================================
+   LEVEL 4 · עוגה
    ingredients = colours shown to the camera (פלו צהוב · מוז כחול · תיק אדום · ליב ירוק)
    טרר = shake · חום = phone face-down 2–5s · רהחום = face-down 6s+
    cake recipe: פלואן · מוז · אלתיק · טרר · רהחום
@@ -520,7 +608,7 @@ function level3(app,L){
   const ui=shell(app,L,["colors","shake","face"]);let seq=[],alive=true,t0=Date.now(),attempts=0,won=false;
   ui.stage.style.setProperty("--stage","#3a2f2a");
   const catBox=h("div",{class:"cat",style:"right:8px;top:24px;width:120px;height:120px"},ui.cat);ui.stage.append(catBox);
-  const camBox=h("div",{class:"cam"},h("span",{class:"dot"}));ui.stage.append(camBox);
+  const camBox=h("div",{class:"cam",hidden:true},h("span",{class:"dot"}));ui.stage.append(camBox);
   const bowl=h("div",{class:"bowl"});ui.stage.append(bowl);
   const hint=h("div",{style:"position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);font-size:64px"},"🥣");ui.stage.append(hint);
   // cookbook (few examples, no explanations)
@@ -536,7 +624,13 @@ function level3(app,L){
   // level 3 needs no typing: replace the text field with a "new bowl" button (no keyboard)
   ui.form.hidden=true;
   ui.form.after(h("button",{class:"btn ghost",onclick:()=>{seq=[];render();ui.stage.querySelectorAll(".dish").forEach(d=>d.remove());ui.speak("רהעוגה?");ui.log("קערה חדשה","קערה ריקה")}},"🥣 קערה חדשה"));
-  gate(app,"מטבח עם חיישנים","בשלב הזה בוק מרגיש דרך המצלמה ודרך התנועה של הטלפון. הדפדפן יבקש רשות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
+  ui.hints([
+    {t:"📷 בוק רואה צבעים דרך המצלמה",chip:camC,show:()=>camBox.hidden=false},
+    {t:"🫨 'טרר' זה לערבב. איך מערבבים עם טלפון?",chip:shC},
+    {t:"🔽 הטלפון יכול להיות תנור. איך מכניסים משהו לתנור?",chip:ovC},
+    {t:"⏱️ כמה זמן הטלפון בתנור? 'רה' זה גדול, אז 'רהחום' זה…"},
+    {t:"'אל' – זוכרים מרמה 2? ו'אן' – מרמה 1?"}]);
+  gate(app,"יום הולדת לבוק","בוק מרגיש את העולם דרך הטלפון. הדפדפן יבקש רשות.",["cam","mot"],r=>{if(S.cam.video){camBox.prepend(S.cam.video)}});
   let colorHeld=null,since=0,armed=true,lastShake=0,ovenStart=0;
   const tick=setInterval(()=>{if(!alive||won)return;const now=performance.now();
     const col=S.mot.faceDown?null:camColor();
