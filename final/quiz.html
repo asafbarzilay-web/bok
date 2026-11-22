@@ -25,7 +25,7 @@ input{width:100%;font:400 22px Heebo,Arial,sans-serif;padding:12px 14px;border-r
 .fb{font-size:22px;font-weight:700;min-height:32px;margin:6px 0}
 .ok{color:#3DDC84}.bad{color:#FF8A8A}.wait{color:#FFD166}
 .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.bar{display:flex;gap:6px;justify-content:center;margin-bottom:4px}
+.bar{display:flex;gap:6px;justify-content:center;margin-bottom:34px}
 .bar i{width:22px;height:8px;border-radius:4px;background:#45407a}
 .bar i.ok{background:#3DDC84}.bar i.bad{background:#FF8A8A}.bar i.wait{background:#FFD166}.bar i.now{outline:2px solid #F2F5F4}
 table{width:100%;border-collapse:collapse;font-size:18px;margin-top:10px}
@@ -65,7 +65,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
   </div>
   <div class="media" id="media"></div>
   </div>
-  <div id="yt" style="position:fixed;bottom:0;right:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"><div id="ytp"></div></div>
+  <div id="yt" style="position:fixed;bottom:0;right:0;width:220px;height:220px;opacity:0.01;pointer-events:none;z-index:-1"><div id="ytp"></div></div>
   <p style="margin-top:16px"><a href="#" id="who2" class="small" style="color:#8FD6C8"></a></p>
 </div>
 
@@ -83,7 +83,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 // ---- if you use a specific song in question 3, put words from its name / singer here, e.g. ["עוד יום","עידן רייכל"] ----
 const SONG=[];
 // ---- Young Folks on YouTube: video id + start second ----
-const YT_ID='51V1VMkuyx0',YT_START=30,YT_LEN=25;
+const YT_ID=new URLSearchParams(location.search).get('yt')||'51V1VMkuyx0',YT_START=30,YT_LEN=25;
 const B='https://asafbarzilay-web.github.io/bok/final/';
 const MORSE=[['א','•▬'],['ה','▬▬▬'],['נ','▬•'],['ב','▬•••'],['ו','•'],['צ','•▬▬'],['ח','••••'],['ל','•▬••'],['ר','•▬•'],['ש','•••'],['מ','▬▬'],['ת','▬']];
 const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','אסור להקליד! רק לשאול את הטלפון בקול.','סרקו את הקוד. בלי לגעת במסך!','סרקו את הקוד. שלוש מילים, בלי להרים את האצבע.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','סרקו, הרגישו, ופענחו. רטט קצר = • רטט ארוך = ▬','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.'];
@@ -97,12 +97,12 @@ const MEDIA=[
  '<img class="photo" src="building.jpg" alt="">',
  qr('qr-buzz.png')+'<div class="morse">'+MORSE.map(([l,c])=>'<span>'+l+' <b>'+c.split('').join(' ')+'</b></span>').join('')+'</div>',
  qr('qr-compass.png')];
-let ytp=null,ytReady=false,ytTimer=null;
-window.onYouTubeIframeAPIReady=()=>{ytp=new YT.Player('ytp',{height:'1',width:'1',videoId:YT_ID,playerVars:{start:YT_START,controls:0},events:{onReady:()=>ytReady=true}})};
+let ytp=null,ytReady=false,ytTimer=null,ytErr=null;
+window.onYouTubeIframeAPIReady=()=>{ytp=new YT.Player('ytp',{height:'220',width:'220',videoId:YT_ID,playerVars:{start:YT_START,controls:0,playsinline:1},events:{onReady:()=>ytReady=true,onError:e=>{ytErr=e.data;const b=document.getElementById('pl');if(b)b.textContent='⚠️ השיר לא נטען ('+e.data+')'}}})};
 (function(){const t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';document.head.appendChild(t)})();
 function stopSong(){try{ytp&&ytReady&&ytp.pauseVideo()}catch(e){}clearTimeout(ytTimer);const b=document.getElementById('pl');if(b)b.textContent='▶ השמיעו את השיר'}
 function wireMedia(i){stopSong();const b=document.getElementById('pl');if(!b)return;
-  b.onclick=()=>{if(!ytReady){b.textContent='⏳ טוען…';return}
+  b.onclick=()=>{if(ytErr!==null){b.textContent='⚠️ השיר לא נטען ('+ytErr+')';return}if(!ytReady){b.textContent='⏳ טוען… לחצו שוב';return}
     const st=ytp.getPlayerState();if(st===1){stopSong();return}
     ytp.seekTo(YT_START,true);ytp.playVideo();b.textContent='⏸ עצירה';clearTimeout(ytTimer);ytTimer=setTimeout(stopSong,YT_LEN*1000)}}
 // Apps Script web-app URL (Google Sheet of results)
