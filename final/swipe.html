@@ -31,7 +31,7 @@ canvas{position:absolute;inset:0;pointer-events:none}
 <div class="code" id="code">הצלחתם! מילת הקוד:<b>דולפין</b></div>
 <script>
 const ROWS=['קראטוןםפ','שדגכעיחלךף','זסבהנמצתץ'];
-const WORDS=['שלום','חתול','טלפון'];
+const WORDS=['שלום','חתול','טלפונית'];
 let cur=0,trace=[],down=false,pts=[],busy=false;
 const kb=document.getElementById('kb'),cv=document.getElementById('cv'),g=cv.getContext('2d');
 ROWS.forEach(r=>{const d=document.createElement('div');d.className='r';[...r].forEach(ch=>{const k=document.createElement('div');k.className='k';k.textContent=ch;k.dataset.ch=ch;d.appendChild(k)});kb.appendChild(d)});
