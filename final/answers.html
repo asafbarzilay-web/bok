@@ -56,7 +56,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 // ---- if you use a specific song in question 3, put words from its name / singer here, e.g. ["עוד יום","עידן רייכל"] ----
 const SONG=[];
 // Apps Script web-app URL (Google Sheet of results)
-const ENDPOINT='';
+const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1KhhNnQ4NpIEhsCtjRUcebJsCorne7bY6BEYSLHu7MC7tw/exec';
 function log(ev,o){if(!ENDPOINT||!S)return;const d=Object.assign({sid:S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
   try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})}catch(e){}}
 const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ומי שר אותו?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","איזה מקום נמצא כאן?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
