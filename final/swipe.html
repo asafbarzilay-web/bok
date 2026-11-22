@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>מקלדת החלקה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+body{touch-action:none}
+.word{font-size:40px;font-weight:700;letter-spacing:6px;color:#FFD166;min-height:56px}
+.trace{font-size:20px;min-height:30px;direction:rtl;opacity:.85}
+.steps{display:flex;gap:8px;justify-content:center}
+.steps i{width:34px;height:8px;border-radius:4px;background:#2B2752}
+.steps i.ok{background:#3DDC84}.steps i.now{background:#FFD166}
+#kb{position:relative;direction:ltr;user-select:none;-webkit-user-select:none;touch-action:none;width:100%;max-width:420px;background:#2B2752;border-radius:16px;padding:10px 6px}
+.r{display:flex;justify-content:center;gap:5px;margin:6px 0}
+.k{flex:0 0 calc((100% - 50px)/10);height:52px;border-radius:9px;background:#1E1B3A;color:#F2F5F4;display:flex;align-items:center;justify-content:center;font:700 22px Heebo,Arial,sans-serif}
+.k.on{background:#8FD6C8;color:#1E1B3A}
+canvas{position:absolute;inset:0;pointer-events:none}
+.msg{min-height:26px;font-weight:700}
+.bad{color:#FF8A8A}.good{color:#3DDC84}
+</style>
+</head><body>
+<h1>〰️ מקלדת החלקה</h1>
+<p>כתבו את המילה <b>בלי להרים את האצבע</b>: מניחים על האות הראשונה, מחליקים דרך כל האותיות, ומרימים רק בסוף.</p>
+<div class="steps" id="steps"></div>
+<div class="word" id="word"></div>
+<div class="trace" id="trace">&nbsp;</div>
+<div class="msg" id="msg"></div>
+<div id="kb"><canvas id="cv"></canvas></div>
+<div class="code" id="code">הצלחתם! מילת הקוד:<b>דולפין</b></div>
+<script>
+const ROWS=['קראטוןםפ','שדגכעיחלךף','זסבהנמצתץ'];
+const WORDS=['שלום','חתול','טלפון'];
+let cur=0,trace=[],down=false,pts=[];
+const kb=document.getElementById('kb'),cv=document.getElementById('cv'),g=cv.getContext('2d');
+ROWS.forEach(r=>{const d=document.createElement('div');d.className='r';[...r].forEach(ch=>{const k=document.createElement('div');k.className='k';k.textContent=ch;k.dataset.ch=ch;d.appendChild(k)});kb.appendChild(d)});
+function size(){cv.width=kb.clientWidth;cv.height=kb.clientHeight}
+addEventListener('resize',size);size();
+const $=id=>document.getElementById(id);
+function show(){$('word').textContent=WORDS[cur]||'';$('steps').innerHTML=WORDS.map((_,i)=>'<i class="'+(i<cur?'ok':i===cur?'now':'')+'"></i>').join('')}
+function keyAt(x,y){const el=document.elementFromPoint(x,y);return el&&el.dataset&&el.dataset.ch?el:null}
+function draw(){g.clearRect(0,0,cv.width,cv.height);if(pts.length<2)return;g.strokeStyle='rgba(255,209,102,.85)';g.lineWidth=8;g.lineCap=g.lineJoin='round';g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(const p of pts)g.lineTo(p[0],p[1]);g.stroke()}
+function add(e){const k=keyAt(e.clientX,e.clientY);const r=kb.getBoundingClientRect();pts.push([e.clientX-r.left,e.clientY-r.top]);draw();
+  if(k&&trace[trace.length-1]!==k.dataset.ch){trace.push(k.dataset.ch);document.querySelectorAll('.k.on').forEach(x=>x.classList.remove('on'));k.classList.add('on');$('trace').textContent=trace.join('')}}
+function isSub(w,t){let j=0;for(const c of t)if(c===w[j])j++;return j===w.length}
+kb.addEventListener('pointerdown',e=>{if(cur>=WORDS.length)return;e.preventDefault();down=true;trace=[];pts=[];$('msg').textContent='';try{kb.setPointerCapture(e.pointerId)}catch(x){}add(e)});
+kb.addEventListener('pointermove',e=>{if(down)add(e)});
+function up(){if(!down)return;down=false;document.querySelectorAll('.k.on').forEach(x=>x.classList.remove('on'));
+  const w=WORDS[cur];
+  if(trace.length<=1){$('msg').className='msg bad';$('msg').textContent='✋ בלי להקיש! מחליקים את האצבע על האותיות.'}
+  else if(trace[0]===w[0]&&trace[trace.length-1]===w[w.length-1]&&isSub(w,trace)){cur++;$('msg').className='msg good';$('msg').textContent='✅ מעולה!';try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}
+    show();if(cur>=WORDS.length){$('code').style.display='block';$('word').textContent='🎉';kb.style.opacity=.4}}
+  else{$('msg').className='msg bad';$('msg').textContent=trace[0]!==w[0]?'❌ התחילו מהאות '+w[0]:trace[trace.length-1]!==w[w.length-1]?'❌ הרימו את האצבע על '+w[w.length-1]:'❌ פספסתם אות. נסו שוב.'}
+  setTimeout(()=>{pts=[];draw()},400)}
+kb.addEventListener('pointerup',up);kb.addEventListener('pointercancel',up);
+show();
+</script>
+</body></html>
