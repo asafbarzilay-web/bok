@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>טלפונית – משימת סיום</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+body{justify-content:flex-start;padding-top:28px}
+.card{max-width:520px;padding:22px}
+#quiz.card{max-width:980px}
+.qwrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;text-align:center}
+@media(max-width:760px){.qwrap{grid-template-columns:1fr}}
+.media{background:#F2F5F4;border-radius:22px;min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;color:#1E1B3A;gap:10px}
+.media img.photo{max-width:100%;max-height:420px;border-radius:14px}
+.media img.qr{width:260px;height:260px;image-rendering:pixelated}
+.media .bigt{font-size:46px;font-weight:700;line-height:1.35}
+.media .hint{font-size:16px;font-weight:700;color:#176659}
+.morse{direction:rtl;display:grid;grid-template-columns:repeat(3,auto);gap:4px 22px;font-size:20px;font-weight:700}
+.morse span b{display:inline-block;direction:ltr;margin-right:6px;letter-spacing:3px}
+.sub{font-size:17px;opacity:.85;margin:4px 0 8px}
+.play{font-size:22px}
+input{width:100%;font:400 22px Heebo,Arial,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid #8FD6C8;background:#1E1B3A;color:#F2F5F4;text-align:center;margin:12px 0}
+.k{color:#8FD6C8;font-size:15px;font-weight:700}
+.q{font-size:24px;font-weight:700;margin:6px 0 2px}
+.fb{font-size:22px;font-weight:700;min-height:32px;margin:6px 0}
+.ok{color:#3DDC84}.bad{color:#FF8A8A}.wait{color:#FFD166}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.bar{display:flex;gap:6px;justify-content:center;margin-bottom:4px}
+.bar i{width:22px;height:8px;border-radius:4px;background:#45407a}
+.bar i.ok{background:#3DDC84}.bar i.bad{background:#FF8A8A}.bar i.wait{background:#FFD166}.bar i.now{outline:2px solid #F2F5F4}
+table{width:100%;border-collapse:collapse;font-size:18px;margin-top:10px}
+td{padding:6px;border-bottom:1px solid #3a3566}
+.big{font-size:48px;font-weight:700;color:#3DDC84}
+.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+#bigx{position:fixed;left:50%;top:45%;font-size:160px;line-height:1;pointer-events:none;z-index:99;opacity:0;transform:translate(-50%,-50%) scale(.3)}
+#bigx.go{animation:xpop .9s ease-out}
+@keyframes xpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-20deg)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(5deg)}45%{transform:translate(-50%,-50%) scale(1) rotate(0)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
+</style>
+</head><body>
+<h1>📱 טלפונית – משימת סיום</h1>
+<div id="bigx">❌</div>
+
+<div class="card" id="start">
+  <p>כתבו את השם שלכם ולחצו "מתחילים".</p>
+  <input id="nm" placeholder="השם שלי" autocomplete="off">
+  <button class="btn" id="go">מתחילים</button>
+</div>
+
+<div class="card" id="quiz" hidden>
+  <div class="bar" id="bar"></div>
+  <div class="qwrap">
+  <div>
+  <div class="k" id="qk"></div>
+  <div class="q" id="qt"></div>
+  <div class="sub" id="qs"></div>
+  <input id="ans" placeholder="התשובה שלי" autocomplete="off">
+  <input id="ans2" autocomplete="off" hidden>
+  <div class="fb" id="fb"></div>
+  <div class="row">
+    <button class="btn" id="chk">בדיקה</button>
+    <button class="btn" id="nx" hidden>לשאלה הבאה ←</button>
+    <button class="btn ghost" id="sk">דלגו</button>
+  </div>
+  </div>
+  <div class="media" id="media"></div>
+  </div>
+  <div id="yt" style="position:fixed;bottom:0;right:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"><div id="ytp"></div></div>
+  <p style="margin-top:16px"><a href="#" id="who2" class="small" style="color:#8FD6C8"></a></p>
+</div>
+
+<div class="card" id="end" hidden>
+  <div id="who" class="q"></div>
+  <div class="big" id="score"></div>
+  <div id="tm" class="small"></div>
+  <table id="tbl"></table>
+  <p class="small" style="margin-top:12px">הראו את המסך הזה למורה 🙂</p>
+  <button class="btn ghost" id="back" style="margin-top:10px">חזרה לשאלות שדילגתי עליהן</button>
+  <p style="margin-top:18px"><a href="#" id="reset" class="small" style="color:#8FD6C8">תלמיד/ה חדש/ה במחשב הזה</a></p>
+</div>
+
+<script>
+// ---- if you use a specific song in question 3, put words from its name / singer here, e.g. ["עוד יום","עידן רייכל"] ----
+const SONG=[];
+// ---- Young Folks on YouTube: video id + start second ----
+const YT_ID='51V1VMkuyx0',YT_START=30,YT_LEN=25;
+const B='https://asafbarzilay-web.github.io/bok/final/';
+const MORSE=[['א','•▬'],['ה','▬▬▬'],['נ','▬•'],['ב','▬•••'],['ו','•'],['צ','•▬▬'],['ח','••••'],['ל','•▬••'],['ר','•▬•'],['ש','•••'],['מ','▬▬'],['ת','▬']];
+const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','אסור להקליד! רק לשאול את הטלפון בקול.','סרקו את הקוד. בלי לגעת במסך!','סרקו את הקוד. שלוש מילים, בלי להרים את האצבע.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','סרקו, הרגישו, ופענחו. רטט קצר = • רטט ארוך = ▬','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.'];
+const qr=f=>'<img class="qr" src="'+f+'" alt="QR">';
+const MEDIA=[
+ '<img class="photo" src="flower.jpg" alt="">',
+ '<div class="bigt" lang="ja">私の猫は<br>月曜日が<br>嫌いです</div>',
+ '<div style="font-size:70px">🎵</div><button class="btn play" id="pl">▶ השמיעו את השיר</button><div class="hint">קרבו את הטלפון לרמקול של המחשב</div>',
+ '<div style="font-size:64px">🗣️ 🔊 ➜ 👂</div>',
+ qr('qr-maze.png'),qr('qr-swipe.png'),qr('qr-sound.png'),
+ '<img class="photo" src="building.jpg" alt="">',
+ qr('qr-buzz.png')+'<div class="morse">'+MORSE.map(([l,c])=>'<span>'+l+' <b>'+c.split('').join(' ')+'</b></span>').join('')+'</div>',
+ qr('qr-compass.png')];
+let ytp=null,ytReady=false,ytTimer=null;
+window.onYouTubeIframeAPIReady=()=>{ytp=new YT.Player('ytp',{height:'1',width:'1',videoId:YT_ID,playerVars:{start:YT_START,controls:0},events:{onReady:()=>ytReady=true}})};
+(function(){const t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';document.head.appendChild(t)})();
+function stopSong(){try{ytp&&ytReady&&ytp.pauseVideo()}catch(e){}clearTimeout(ytTimer);const b=document.getElementById('pl');if(b)b.textContent='▶ השמיעו את השיר'}
+function wireMedia(i){stopSong();const b=document.getElementById('pl');if(!b)return;
+  b.onclick=()=>{if(!ytReady){b.textContent='⏳ טוען…';return}
+    const st=ytp.getPlayerState();if(st===1){stopSong();return}
+    ytp.seekTo(YT_START,true);ytp.playVideo();b.textContent='⏸ עצירה';clearTimeout(ytTimer);ytTimer=setTimeout(stopSong,YT_LEN*1000)}}
+// Apps Script web-app URL (Google Sheet of results)
+const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1KhhNnQ4NpIEhsCtjRUcebJsCorne7bY6BEYSLHu7MC7tw/exec';
+function log(ev,o){if(!ENDPOINT||!S)return;const d=Object.assign({sid:'Q'+S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
+  try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)}).catch(()=>{})}catch(e){}}
+const FIELDS={2:['שם השיר','שנה']};
+const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","מקלדת החלקה – מה מילת הקוד?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
+const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJwYXJ0cyI6IFt7ImFsdCI6IFtbInlvdW5nIiwgImZvbGsiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyJdLCBbIteZ15DXoNeSIiwgItek15XXp9ehIl1dfSwgeyJhbHQiOiBbWyIyMDA2Il1dfV19LCAiNCI6IHsibnVtIjogW1szMjAsIDM2MF0sIFsxMTUwLCAxMzAwXV19LCAiNSI6IHsiYW55IjogWyLXpNeZ16DXkteV15XXmdefIiwgItek15nXoNeS15XXmdefIiwgInBlbmd1aW4iXX0sICI2IjogeyJhbnkiOiBbIteT15XXnNek15nXnyIsICJkb2xwaGluIl19LCAiNyI6IHsiYW55IjogWyLXkNeR15jXmdeXIl19LCAiOCI6IHsiYW55IjogWyLXp9eV15DXnNeUIiwgImt1YWxhIl19LCAiOSI6IHsiYW55IjogWyLXntem15zXnteUIiwgItee16bXnNee15AiXX0sICIxMCI6IHsiYW55IjogWyLXp9en15jXldehIiwgImNhY3R1cyJdfX0="),c=>c.charCodeAt(0))));
+const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
+function rule(k,a){const n=norm(a);if(k.alt)return k.alt.some(g=>g.every(w=>n.includes(norm(w))));if(k.all)return k.all.every(w=>n.includes(norm(w)));return k.any.some(w=>n.includes(norm(w)))}
+function partsOf(i,a){const k=K[i+1];const v=a.split(' | ');return k.parts.map((p,j)=>!!(v[j]&&norm(v[j]))&&rule(p,v[j]))}
+function confetti(){const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99';document.body.appendChild(c);
+  const W=c.width=innerWidth,H=c.height=innerHeight,g=c.getContext('2d'),C=['#8FD6C8','#FFD166','#FF9F80','#B8A6FF','#3DDC84','#F2F5F4'];
+  const P=[...Array(140)].map(()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.55,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,s:Math.random()*8+5,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0]}));
+  const t0=performance.now();(function f(t){g.clearRect(0,0,W,H);const a=1-Math.max(0,(t-t0-1400)/600);
+    for(const p of P){p.vy+=.45;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;g.save();g.globalAlpha=Math.max(0,a);g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);g.restore()}
+    if(t-t0<2000)requestAnimationFrame(f);else c.remove()})(t0)}
+function nope(){const x=$('bigx'),q=$('quiz');x.classList.remove('go');q.classList.remove('shake');void x.offsetWidth;x.classList.add('go');q.classList.add('shake');try{navigator.vibrate&&navigator.vibrate(150)}catch(e){}}
+function check(i,a){const k=K[i+1],n=norm(a);if(!n)return null;
+  if(k.parts){const v=a.split(' | ');if(v.some(x=>!norm(x||'')))return null;return partsOf(i,a).every(Boolean)}
+  if(k.song)return SONG.length?SONG.some(w=>n.includes(norm(w))):'wait';
+  if(k.num){const nums=(a.replace(/,/g,'').match(/\d+(\.\d+)?/g)||[]).map(Number);return nums.some(v=>k.num.some(([lo,hi])=>v>=lo&&v<=hi))}
+  if(k.alt)return k.alt.some(g=>g.every(w=>n.includes(norm(w))));
+  if(k.all)return k.all.every(w=>n.includes(norm(w)));
+  return k.any.some(w=>n.includes(norm(w)))}
+let S;try{S=JSON.parse(localStorage.getItem('tel_quiz')||'null')}catch(e){}
+const save=()=>{try{localStorage.setItem('tel_quiz',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+function show(w){['start','quiz','end'].forEach(x=>$(x).hidden=x!==w)}
+function bar(){$('bar').innerHTML=Q.map((_,i)=>'<i class="'+(S.res[i]===true?'ok':S.res[i]==='wait'?'wait':S.tries[i]?'bad':'')+(i===S.cur?' now':'')+'"></i>').join('')}
+function ask(){const i=S.cur;$('media').innerHTML=MEDIA[i];$('qs').textContent=SUB[i];wireMedia(i);$('who2').textContent=S.name+' · לא אני? התחלה מחדש';$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
+  const F=FIELDS[i],pv=(S.ans[i]||'').split(' | ');$('ans2').hidden=!F;$('ans').placeholder=F?F[0]:'התשובה שלי';if(F)$('ans2').placeholder=F[1];
+  $('ans').value=F?(pv[0]||''):(S.ans[i]||'');$('ans2').value=F?(pv[1]||''):'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
+  if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);bar();setTimeout(()=>$('ans').focus(),50)}
+function done(r){$('fb').textContent=r===true?'✅ נכון!':'📝 נרשם – המורה יבדוק';$('fb').className='fb '+(r===true?'ok':'wait');
+  $('chk').hidden=true;$('sk').hidden=true;$('nx').hidden=false;$('nx').focus()}
+function nextQ(){const order=[...Array(Q.length).keys()].map(k=>(S.cur+1+k)%Q.length);
+  const n=order.find(i=>S.res[i]!==true&&S.res[i]!=='wait'&&!S.skipped[i]);
+  if(n===undefined||(n<=S.cur&&!S.review)){finish();return}S.cur=n;save();ask()}
+$('go').onclick=()=>{const nm=$('nm').value.trim();if(!nm){$('nm').focus();return}
+  S={sid:Math.random().toString(36).slice(2,8),name:nm,t0:Date.now(),cur:0,ans:[],res:[],tries:[],skipped:[]};save();log('start');show('quiz');ask()};
+$('nm').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
+$('chk').onclick=()=>{const i=S.cur,a=FIELDS[i]?$('ans').value.trim()+' | '+$('ans2').value.trim():$('ans').value;const r=check(i,a);if(r===null){(FIELDS[i]&&$('ans').value.trim()?$('ans2'):$('ans')).focus();return}
+  S.ans[i]=a;S.tries[i]=(S.tries[i]||0)+1;log('try',{q:i+1,a:a,r:r===true?'✅':r==='wait'?'📝':'❌',n:S.tries[i]});
+  if(r===true||r==='wait'){S.res[i]=r;S.skipped[i]=false;save();bar();done(r);if(r===true)confetti()}
+  else{S.res[i]=false;save();bar();let msg='❌ לא נכון. נסו שוב!';if(FIELDS[i]){const p=partsOf(i,a);msg=p.map((ok,j)=>(ok?'✅ ':'❌ ')+FIELDS[i][j]).join(' · ')}$('fb').textContent=msg;nope();$('fb').className='fb bad';$('ans').select()}};
+$('ans2').onkeydown=e=>{if(e.key==='Enter')$('nx').hidden?$('chk').click():$('nx').click()};
+$('ans').onkeydown=e=>{if(e.key==='Enter'&&FIELDS[S.cur]&&!$('ans2').value.trim()){$('ans2').focus();return}if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
+$('nx').onclick=nextQ;
+$('sk').onclick=()=>{S.skipped[S.cur]=true;save();log('skip',{q:S.cur+1});nextQ()};
+function finish(){stopSong();if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===true).length+'/'+Q.length})}S.review=false;save();show('end');
+  const ok=S.res.filter(r=>r===true).length,w=S.res.filter(r=>r==='wait').length;
+  $('who').textContent=S.name;$('score').textContent=ok+' / '+Q.length;
+  const m=Math.round((S.t1-S.t0)/60000);$('tm').textContent='זמן: '+m+' דקות'+(w?' · שאלה אחת מחכה לבדיקת המורה':'');
+  $('tbl').innerHTML=Q.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+(S.res[i]===true?'✅':S.res[i]==='wait'?'📝':'⬜')+'</td><td>'+(S.ans[i]?S.ans[i].replace(/</g,'&lt;'):'—')+'</td></tr>').join('');
+  $('back').hidden=!Q.some((_,i)=>S.res[i]!==true&&S.res[i]!=='wait')}
+$('back').onclick=()=>{S.skipped=[];S.review=true;S.t1=null;const n=Q.findIndex((_,i)=>S.res[i]!==true&&S.res[i]!=='wait');S.cur=n;save();show('quiz');ask()};
+function reset(e){e.preventDefault();if(confirm('להתחיל מההתחלה עם שם אחר?')){try{localStorage.removeItem('tel_quiz')}catch(x){}location.reload()}}
+$('reset').onclick=reset;$('who2').onclick=reset;
+if(S&&S.name&&!S.sid){S.sid=Math.random().toString(36).slice(2,8);save()}
+if(S&&S.name){if(S.t1)finish();else{show('quiz');ask()}}
+</script>
+</body></html>
