@@ -13,15 +13,15 @@
 </style>
 </head><body>
 <h1>🎤 מד הקול</h1>
-<p>השמיעו קול כך שהפס הצהוב יישאר בתוך האזור הירוק 5 שניות. כל פעם שמצליחים, האזור הירוק זז למקום אחר: לפעמים צריך ללחוש, לפעמים לצעוק.</p>
+<p>השמיעו קול כך שהפס הצהוב יישאר בתוך האזור הירוק 3 שניות. כל פעם שמצליחים, האזור הירוק זז למקום אחר: לפעמים צריך ללחוש, לפעמים לצעוק.</p>
 <div class="steps" id="steps"></div>
 <button class="btn" id="go">התחילו</button>
 <div class="meter"><div class="band"></div><div class="lvl" id="lvl"></div></div>
-<div class="ring" id="t">⁦0.0 / 5.0⁩</div>
+<div class="ring" id="t">⁦0.0 / 3.0⁩</div>
 <div class="code" id="code">הצלחתם! מילת הקוד:<b>אבטיח</b></div>
 <script>
 const lvl=document.getElementById('lvl'),t=document.getElementById('t'),band=document.querySelector('.band');
-const STAGES=[.42,.14,.70,.26,.78],H=.2,NEED=5;let st=0,held=0,out=0,last=0,won=false,sm=0,pause=0;
+const STAGES=[.42,.14,.70,.26,.78],H=.2,NEED=3;let st=0,held=0,out=0,last=0,won=false,sm=0,pause=0;
 function stage(){band.style.bottom=(STAGES[st]*100)+'%';document.getElementById('steps').innerHTML=STAGES.map((_,i)=>'<i class="'+(i<st?'ok':i===st?'now':'')+'"></i>').join('')}
 stage();
 document.getElementById('go').onclick=async()=>{
