@@ -5,25 +5,48 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
 <style>
-#flash{position:fixed;inset:0;background:#F2F5F4;opacity:0;pointer-events:none;transition:opacity .05s}
-#flash.on{opacity:1}
+.dots{display:flex;gap:10px;justify-content:center;margin:6px 0}
+.dots i{width:16px;height:16px;border-radius:50%;background:#2B2752;border:2px solid #8FD6C8}
+.dots i.done{background:#8FD6C8}
+.dots i.now{background:#FFD166;border-color:#FFD166}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#st{font-size:20px;font-weight:700}
 </style>
 </head><body>
-<div id="flash"></div>
 <h1>📳 הודעה ברטט</h1>
-<p>שימו יד על הטלפון ולחצו "נגנו". הטלפון ירטוט מילה בקוד: רטט קצר = • , רטט ארוך = ▬. הטבלה נמצאת בשקף.</p>
-<p class="small">באייפון אין רטט מהדפדפן, אז המסך יהבהב במקום (קצר / ארוך).</p>
-<button class="btn" id="go">▶ נגנו</button>
-<div class="card" id="st">מוכן</div>
+<p>שימו יד על הטלפון ולחצו "נגנו". הטלפון ירטוט אות אחת בקוד מורס: רטט קצר = • , רטט ארוך = ▬. הטבלה נמצאת בשקף.</p>
+<p class="small" id="ios" hidden>הטלפון הזה לא יכול לרטוט מהדפדפן, אז תשמעו צפצופים במקום (קצר / ארוך). הגבירו את הקול.</p>
+<div class="dots" id="dots"></div>
+<div class="card" id="st">אות 1 מתוך 5</div>
+<div class="row">
+  <button class="btn" id="play">▶ נגנו</button>
+</div>
+<div class="row">
+  <button class="btn ghost" id="prev">→ אות קודמת</button>
+  <button class="btn ghost" id="next">אות הבאה ←</button>
+</div>
+<p class="small">כתבו כל אות שזיהיתם. 5 אותיות = מילה אחת.</p>
 <script>
-// word: ח ו ש  →  •••• | •▬▬ | •••
-const WORD=[[1,1,1,1],[1,3,3],[1,1,1]],U=220;
-const fl=document.getElementById('flash'),st=document.getElementById('st');let busy=false;
+// word: מ צ ל מ ה  (Hebrew Morse)  1 = short, 3 = long
+const WORD=[[3,3],[1,3,3],[1,3,1,1],[3,3],[3,3,3]],U=230;
+const canBuzz=!!navigator.vibrate&&!/iPhone|iPad|iPod/.test(navigator.userAgent);
+if(!canBuzz)document.getElementById('ios').hidden=false;
+let cur=0,busy=false,ac=null;
+const st=document.getElementById('st'),dots=document.getElementById('dots');
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-document.getElementById('go').onclick=async()=>{if(busy)return;busy=true;st.textContent='מנגן… הרגישו!';await wait(800);
-  for(let li=0;li<WORD.length;li++){st.textContent='אות '+(li+1)+' מתוך '+WORD.length;
-    for(const d of WORD[li]){try{navigator.vibrate&&navigator.vibrate(d*U)}catch(e){}fl.classList.add('on');await wait(d*U);fl.classList.remove('on');await wait(U*1.3)}
-    await wait(U*5)}
-  st.textContent='נגמר. אפשר לנגן שוב.';busy=false};
+function render(){dots.innerHTML=WORD.map((_,i)=>'<i class="'+(i<cur?'done':i===cur?'now':'')+'"></i>').join('');
+  if(!busy)st.textContent='אות '+(cur+1)+' מתוך '+WORD.length;
+  document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===WORD.length-1;
+  document.getElementById('play').textContent=played[cur]?'🔁 שוב את אות '+(cur+1):'▶ נגנו את אות '+(cur+1)}
+const played=[];
+function beep(ms){if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();
+  const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=700;g.gain.value=.4;o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}
+async function play(){if(busy)return;busy=true;st.textContent='מנגן… הרגישו!';await wait(500);
+  for(const d of WORD[cur]){if(canBuzz){try{navigator.vibrate(d*U)}catch(e){}}else beep(d*U);await wait(d*U+U*1.4)}
+  busy=false;played[cur]=1;render()}
+document.getElementById('play').onclick=play;
+document.getElementById('next').onclick=()=>{if(!busy&&cur<WORD.length-1){cur++;render()}};
+document.getElementById('prev').onclick=()=>{if(!busy&&cur>0){cur--;render()}};
+render();
 </script>
 </body></html>

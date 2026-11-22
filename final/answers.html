@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>טלפונית – דף תשובות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+body{justify-content:flex-start;padding-top:28px}
+.card{max-width:520px;padding:22px}
+input{width:100%;font:400 22px Heebo,Arial,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid #8FD6C8;background:#1E1B3A;color:#F2F5F4;text-align:center;margin:12px 0}
+.k{color:#8FD6C8;font-size:15px;font-weight:700}
+.q{font-size:24px;font-weight:700;margin:6px 0 2px}
+.fb{font-size:22px;font-weight:700;min-height:32px;margin:6px 0}
+.ok{color:#3DDC84}.bad{color:#FF8A8A}.wait{color:#FFD166}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.bar{display:flex;gap:6px;justify-content:center;margin-bottom:4px}
+.bar i{width:22px;height:8px;border-radius:4px;background:#2B2752}
+.bar i.ok{background:#3DDC84}.bar i.bad{background:#FF8A8A}.bar i.wait{background:#FFD166}.bar i.now{outline:2px solid #F2F5F4}
+table{width:100%;border-collapse:collapse;font-size:18px;margin-top:10px}
+td{padding:6px;border-bottom:1px solid #3a3566}
+.big{font-size:48px;font-weight:700;color:#3DDC84}
+</style>
+</head><body>
+<h1>📱 טלפונית – משימת סיום</h1>
+
+<div class="card" id="start">
+  <p>כתבו את השם שלכם ולחצו "מתחילים".</p>
+  <input id="nm" placeholder="השם שלי" autocomplete="off">
+  <button class="btn" id="go">מתחילים</button>
+</div>
+
+<div class="card" id="quiz" hidden>
+  <div class="bar" id="bar"></div>
+  <div class="k" id="qk"></div>
+  <div class="q" id="qt"></div>
+  <input id="ans" placeholder="התשובה שלי" autocomplete="off">
+  <div class="fb" id="fb"></div>
+  <div class="row">
+    <button class="btn" id="chk">בדיקה</button>
+    <button class="btn" id="nx" hidden>לשאלה הבאה ←</button>
+    <button class="btn ghost" id="sk">דלגו</button>
+  </div>
+</div>
+
+<div class="card" id="end" hidden>
+  <div id="who" class="q"></div>
+  <div class="big" id="score"></div>
+  <div id="tm" class="small"></div>
+  <table id="tbl"></table>
+  <p class="small" style="margin-top:12px">הראו את המסך הזה למורה 🙂</p>
+  <button class="btn ghost" id="back" style="margin-top:10px">חזרה לשאלות שדילגתי עליהן</button>
+  <p style="margin-top:18px"><a href="#" id="reset" class="small" style="color:#8FD6C8">תלמיד/ה חדש/ה במחשב הזה</a></p>
+</div>
+
+<script>
+// ---- if you use a specific song in question 3, put words from its name / singer here, e.g. ["עוד יום","עידן רייכל"] ----
+const SONG=[];
+const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ומי שר אותו?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","איזה מקום נמצא כאן?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
+const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbnkiOiBbIteb15zXoNeZ16oiLCAiYW5lbW9uZSJdfSwgIjIiOiB7ImFsbCI6IFsi15fXqteV15wiLCAi16nXldeg15AiLCAi16nXoNeZIl19LCAiMyI6IHsic29uZyI6IHRydWV9LCAiNCI6IHsibnVtIjogW1szMjAsIDM2MF0sIFsxMTUwLCAxMzAwXV19LCAiNSI6IHsiYW55IjogWyLXpNeZ16DXkteV15XXmdefIiwgItek15nXoNeS15XXmdefIiwgInBlbmd1aW4iXX0sICI2IjogeyJhbnkiOiBbIteb15XXqtecIl19LCAiNyI6IHsiYW55IjogWyLXkNeR15jXmdeXIl19LCAiOCI6IHsiYW55IjogWyLXp9eV15DXnNeUIiwgImt1YWxhIl19LCAiOSI6IHsiYW55IjogWyLXntem15zXnteUIiwgItee16bXnNee15AiXX0sICIxMCI6IHsiYW55IjogWyLXp9en15jXldehIiwgImNhY3R1cyJdfX0="),c=>c.charCodeAt(0))));
+const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
+function check(i,a){const k=K[i+1],n=norm(a);if(!n)return null;
+  if(k.song)return SONG.length?SONG.some(w=>n.includes(norm(w))):'wait';
+  if(k.num){const nums=(a.replace(/,/g,'').match(/\d+(\.\d+)?/g)||[]).map(Number);return nums.some(v=>k.num.some(([lo,hi])=>v>=lo&&v<=hi))}
+  if(k.all)return k.all.every(w=>n.includes(norm(w)));
+  return k.any.some(w=>n.includes(norm(w)))}
+let S;try{S=JSON.parse(localStorage.getItem('tel_final')||'null')}catch(e){}
+const save=()=>{try{localStorage.setItem('tel_final',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+function show(w){['start','quiz','end'].forEach(x=>$(x).hidden=x!==w)}
+function bar(){$('bar').innerHTML=Q.map((_,i)=>'<i class="'+(S.res[i]===true?'ok':S.res[i]==='wait'?'wait':S.tries[i]?'bad':'')+(i===S.cur?' now':'')+'"></i>').join('')}
+function ask(){const i=S.cur;$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
+  $('ans').value=S.ans[i]||'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
+  if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);bar();setTimeout(()=>$('ans').focus(),50)}
+function done(r){$('fb').textContent=r===true?'✅ נכון!':'📝 נרשם – המורה יבדוק';$('fb').className='fb '+(r===true?'ok':'wait');
+  $('chk').hidden=true;$('sk').hidden=true;$('nx').hidden=false;$('nx').focus()}
+function nextQ(){const order=[...Array(Q.length).keys()].map(k=>(S.cur+1+k)%Q.length);
+  const n=order.find(i=>S.res[i]!==true&&S.res[i]!=='wait'&&!S.skipped[i]);
+  if(n===undefined||(n<=S.cur&&!S.review)){finish();return}S.cur=n;save();ask()}
+$('go').onclick=()=>{const nm=$('nm').value.trim();if(!nm){$('nm').focus();return}
+  S={name:nm,t0:Date.now(),cur:0,ans:[],res:[],tries:[],skipped:[]};save();show('quiz');ask()};
+$('nm').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
+$('chk').onclick=()=>{const i=S.cur,a=$('ans').value;const r=check(i,a);if(r===null){$('ans').focus();return}
+  S.ans[i]=a;S.tries[i]=(S.tries[i]||0)+1;
+  if(r===true||r==='wait'){S.res[i]=r;S.skipped[i]=false;save();bar();done(r)}
+  else{S.res[i]=false;save();bar();$('fb').textContent='❌ לא נכון. נסו שוב!';$('fb').className='fb bad';$('ans').select()}};
+$('ans').onkeydown=e=>{if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
+$('nx').onclick=nextQ;
+$('sk').onclick=()=>{S.skipped[S.cur]=true;save();nextQ()};
+function finish(){S.t1=S.t1||Date.now();S.review=false;save();show('end');
+  const ok=S.res.filter(r=>r===true).length,w=S.res.filter(r=>r==='wait').length;
+  $('who').textContent=S.name;$('score').textContent=ok+' / '+Q.length;
+  const m=Math.round((S.t1-S.t0)/60000);$('tm').textContent='זמן: '+m+' דקות'+(w?' · שאלה אחת מחכה לבדיקת המורה':'');
+  $('tbl').innerHTML=Q.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+(S.res[i]===true?'✅':S.res[i]==='wait'?'📝':'⬜')+'</td><td>'+(S.ans[i]?S.ans[i].replace(/</g,'&lt;'):'—')+'</td></tr>').join('');
+  $('back').hidden=!Q.some((_,i)=>S.res[i]!==true&&S.res[i]!=='wait')}
+$('back').onclick=()=>{S.skipped=[];S.review=true;S.t1=null;const n=Q.findIndex((_,i)=>S.res[i]!==true&&S.res[i]!=='wait');S.cur=n;save();show('quiz');ask()};
+$('reset').onclick=e=>{e.preventDefault();if(confirm('למחוק את התשובות ולהתחיל מחדש?')){localStorage.removeItem('tel_final');location.reload()}};
+if(S&&S.name){if(S.t1)finish();else{show('quiz');ask()}}
+</script>
+</body></html>
