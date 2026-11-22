@@ -19,19 +19,19 @@ const M=[
 "1000X00000001001",
 "1111111111001001",
 "1X000X0000001001",
-"1000000X000X1001",
+"1000000X00001001",
 "1001111111111001",
-"1001000X000X1001",
+"10010000000X1001",
 "10X1000000001001",
 "1001111001001001",
 "1000X000010000X1",
-"1X000000X1X00001",
+"10000000X1000001",
 "1111111111111001",
 "1000000001X00001",
-"10000000010000X1",
+"1000000001000001",
 "1001111001001111",
 "10000010010000X1",
-"1000001001X00001",
+"1000001001000001",
 "1001001111111001",
 "1001000000000001",
 "10010000000000E1",
@@ -39,18 +39,19 @@ const M=[
 const C=19,cv=document.getElementById('c'),g=cv.getContext('2d');
 let x=28.5,y=28.5,vx=0,vy=0,ax=0,ay=0,won=false,run=false;const R=6;
 const wall=(cx,cy)=>{const r=M[cy];return !r||r[cx]==='1'||r[cx]===undefined};
-let goal,holes=[],falls=0;M.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='X')holes.push({x:i*C+C/2,y:j*C+C/2})}));M.forEach((r,j)=>{const i=r.indexOf('E');if(i>=0)goal={x:i*C+C/2,y:j*C+C/2}});
+let goal,holes=[],falls=0,hist=[];M.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='X')holes.push({x:i*C+C/2,y:j*C+C/2})}));M.forEach((r,j)=>{const i=r.indexOf('E');if(i>=0)goal={x:i*C+C/2,y:j*C+C/2}});
 function hit(px,py){for(const[dx,dy]of[[R,0],[-R,0],[0,R],[0,-R],[R*.7,R*.7],[-R*.7,R*.7],[R*.7,-R*.7],[-R*.7,-R*.7]]){if(wall(Math.floor((px+dx)/C),Math.floor((py+dy)/C)))return true}return false}
 function step(){if(!run)return;vx=(vx+ax*.28)*.96;vy=(vy+ay*.28)*.96;
-  const sp=Math.hypot(vx,vy);if(sp>4.5){vx*=4.5/sp;vy*=4.5/sp}
+  const sp=Math.hypot(vx,vy);if(sp>3.6){vx*=3.6/sp;vy*=3.6/sp}
   if(!hit(x+vx,y))x+=vx;else vx*=-.3;
   if(!hit(x,y+vy))y+=vy;else vy*=-.3;
-  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<8){x=28.5;y=28.5;vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים להתחלה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
+  hist.push({x,y});if(hist.length>400)hist.shift();
+  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<6.5){const b=hist[Math.max(0,hist.length-90)]||{x:28.5,y:28.5};x=b.x;y=b.y;hist.length=Math.max(0,hist.length-90);vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים קצת אחורה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
   if(!won&&Math.hypot(x-goal.x,y-goal.y)<8){won=true;document.getElementById('code').style.display='block';try{navigator.vibrate&&navigator.vibrate([80,60,200])}catch(e){}}
   draw();requestAnimationFrame(step)}
 function draw(){g.clearRect(0,0,cv.width,cv.height);g.fillStyle='#8FD6C8';
   M.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='1')g.fillRect(i*C,j*C,C,C)}));
-  g.fillStyle='#FF6B6B';holes.forEach(h=>{g.beginPath();g.arc(h.x,h.y,8,0,7);g.fill()});g.fillStyle='#3DDC84';g.beginPath();g.arc(goal.x,goal.y,9,0,7);g.fill();
+  g.fillStyle='#FF6B6B';holes.forEach(h=>{g.beginPath();g.arc(h.x,h.y,7,0,7);g.fill()});g.fillStyle='#3DDC84';g.beginPath();g.arc(goal.x,goal.y,9,0,7);g.fill();
   g.fillStyle=won?'#3DDC84':'#FFD166';g.beginPath();g.arc(x,y,R,0,7);g.fill()}
 function onOri(e){if(e.gamma==null)return;ax=Math.max(-1,Math.min(1,e.gamma/30));ay=Math.max(-1,Math.min(1,(e.beta-10)/30))}
 document.getElementById('go').onclick=async()=>{
