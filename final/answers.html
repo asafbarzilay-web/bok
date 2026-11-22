@@ -55,6 +55,10 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 <script>
 // ---- if you use a specific song in question 3, put words from its name / singer here, e.g. ["עוד יום","עידן רייכל"] ----
 const SONG=[];
+// Apps Script web-app URL (Google Sheet of results)
+const ENDPOINT='';
+function log(ev,o){if(!ENDPOINT||!S)return;const d=Object.assign({sid:S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
+  try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})}catch(e){}}
 const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ומי שר אותו?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","איזה מקום נמצא כאן?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
 const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbnkiOiBbIteb15zXoNeZ16oiLCAiYW5lbW9uZSJdfSwgIjIiOiB7ImFsbCI6IFsi15fXqteV15wiLCAi16nXldeg15AiLCAi16nXoNeZIl19LCAiMyI6IHsic29uZyI6IHRydWV9LCAiNCI6IHsibnVtIjogW1szMjAsIDM2MF0sIFsxMTUwLCAxMzAwXV19LCAiNSI6IHsiYW55IjogWyLXpNeZ16DXkteV15XXmdefIiwgItek15nXoNeS15XXmdefIiwgInBlbmd1aW4iXX0sICI2IjogeyJhbnkiOiBbIteb15XXqtecIl19LCAiNyI6IHsiYW55IjogWyLXkNeR15jXmdeXIl19LCAiOCI6IHsiYW55IjogWyLXp9eV15DXnNeUIiwgImt1YWxhIl19LCAiOSI6IHsiYW55IjogWyLXntem15zXnteUIiwgItee16bXnNee15AiXX0sICIxMCI6IHsiYW55IjogWyLXp9en15jXldehIiwgImNhY3R1cyJdfX0="),c=>c.charCodeAt(0))));
 const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
@@ -77,16 +81,16 @@ function nextQ(){const order=[...Array(Q.length).keys()].map(k=>(S.cur+1+k)%Q.le
   const n=order.find(i=>S.res[i]!==true&&S.res[i]!=='wait'&&!S.skipped[i]);
   if(n===undefined||(n<=S.cur&&!S.review)){finish();return}S.cur=n;save();ask()}
 $('go').onclick=()=>{const nm=$('nm').value.trim();if(!nm){$('nm').focus();return}
-  S={name:nm,t0:Date.now(),cur:0,ans:[],res:[],tries:[],skipped:[]};save();show('quiz');ask()};
+  S={sid:Math.random().toString(36).slice(2,8),name:nm,t0:Date.now(),cur:0,ans:[],res:[],tries:[],skipped:[]};save();log('start');show('quiz');ask()};
 $('nm').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
 $('chk').onclick=()=>{const i=S.cur,a=$('ans').value;const r=check(i,a);if(r===null){$('ans').focus();return}
-  S.ans[i]=a;S.tries[i]=(S.tries[i]||0)+1;
+  S.ans[i]=a;S.tries[i]=(S.tries[i]||0)+1;log('try',{q:i+1,a:a,r:r===true?'✅':r==='wait'?'📝':'❌',n:S.tries[i]});
   if(r===true||r==='wait'){S.res[i]=r;S.skipped[i]=false;save();bar();done(r)}
   else{S.res[i]=false;save();bar();$('fb').textContent='❌ לא נכון. נסו שוב!';$('fb').className='fb bad';$('ans').select()}};
 $('ans').onkeydown=e=>{if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
 $('nx').onclick=nextQ;
-$('sk').onclick=()=>{S.skipped[S.cur]=true;save();nextQ()};
-function finish(){S.t1=S.t1||Date.now();S.review=false;save();show('end');
+$('sk').onclick=()=>{S.skipped[S.cur]=true;save();log('skip',{q:S.cur+1});nextQ()};
+function finish(){if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===true).length+'/'+Q.length})}S.review=false;save();show('end');
   const ok=S.res.filter(r=>r===true).length,w=S.res.filter(r=>r==='wait').length;
   $('who').textContent=S.name;$('score').textContent=ok+' / '+Q.length;
   const m=Math.round((S.t1-S.t0)/60000);$('tm').textContent='זמן: '+m+' דקות'+(w?' · שאלה אחת מחכה לבדיקת המורה':'');
