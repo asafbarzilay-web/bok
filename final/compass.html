@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>מצפן</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+.dial{width:240px;height:240px;border-radius:50%;background:#2B2752;position:relative;border:6px solid #8FD6C8}
+.needle{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.needle span{position:absolute;left:-14px;top:-105px;font-size:30px}
+.ring{font-size:22px;font-weight:700}
+</style>
+</head><body>
+<h1>🧭 איפה צפון?</h1>
+<p>החזיקו את הטלפון שטוח, וסובבו את עצמכם עד שהטלפון מצביע צפונה. תחזיקו כך 3 שניות.</p>
+<button class="btn" id="go">התחילו</button>
+<div class="dial"><div class="needle" id="nd"><span>⬆️</span></div></div>
+<div class="ring" id="t">—</div>
+<div class="code" id="code">הצלחתם! מילת הקוד:<b>קקטוס</b></div>
+<script>
+const nd=document.getElementById('nd'),t=document.getElementById('t');let head=null,held=0,last=performance.now(),won=false;
+function set(h){head=h}
+function onAbs(e){if(e.absolute&&e.alpha!=null)set((360-e.alpha)%360)}
+function onIos(e){if(e.webkitCompassHeading!=null)set(e.webkitCompassHeading)}
+document.getElementById('go').onclick=async()=>{
+  try{if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission()}catch(e){}
+  addEventListener('deviceorientationabsolute',onAbs);addEventListener('deviceorientation',onIos);
+  document.getElementById('go').hidden=true;
+  (function loop(now){const dt=(now-last)/1000;last=now;
+    if(head==null){t.textContent='מחכה למצפן… (נסו להזיז את הטלפון בצורת 8)'}
+    else{nd.style.transform='rotate('+(-head)+'deg)';const off=Math.min(head,360-head);
+      held=off<15?held+dt:0;if(!won)t.textContent=off<15?('צפון! '+Math.min(3,held).toFixed(1)+' / 3.0'):('עוד '+Math.round(off)+'°');
+      if(!won&&held>=3){won=true;document.getElementById('code').style.display='block';t.textContent='✔';try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}}}
+    requestAnimationFrame(loop)})(performance.now());
+};
+</script>
+</body></html>

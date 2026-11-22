@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>מבוך</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>canvas{background:#2B2752;border-radius:16px;touch-action:none;max-width:100%}</style>
+</head><body>
+<h1>🟡 המבוך</h1>
+<p id="msg">הכניסו את הכדור לחור הירוק. בלי לגעת במסך!</p>
+<button class="btn" id="go">התחילו</button>
+<canvas id="c" width="320" height="420" hidden></canvas>
+<div class="code" id="code">הצלחתם! מילת הקוד:<b>פינגווין</b></div>
+<p class="small">במחשב: חיצים במקלדת</p>
+<script>
+// 1 = wall. 8 cols x 11 rows, cell 40px
+const M=[
+"11111111",
+"10000101",
+"10110101",
+"10100001",
+"10101111",
+"10001001",
+"11101011",
+"10001001",
+"10111101",
+"100000E1",
+"11111111"];
+const C=40,cv=document.getElementById('c'),g=cv.getContext('2d');
+let x=60,y=60,vx=0,vy=0,ax=0,ay=0,won=false,run=false;const R=11;
+const wall=(cx,cy)=>{const r=M[cy];return !r||r[cx]==='1'||r[cx]===undefined};
+let goal;M.forEach((r,j)=>{const i=r.indexOf('E');if(i>=0)goal={x:i*C+C/2,y:j*C+C/2}});
+function hit(px,py){for(const[dx,dy]of[[R,0],[-R,0],[0,R],[0,-R],[R*.7,R*.7],[-R*.7,R*.7],[R*.7,-R*.7],[-R*.7,-R*.7]]){if(wall(Math.floor((px+dx)/C),Math.floor((py+dy)/C)))return true}return false}
+function step(){if(!run)return;vx=(vx+ax*.35)*.96;vy=(vy+ay*.35)*.96;
+  const sp=Math.hypot(vx,vy);if(sp>7){vx*=7/sp;vy*=7/sp}
+  if(!hit(x+vx,y))x+=vx;else vx*=-.3;
+  if(!hit(x,y+vy))y+=vy;else vy*=-.3;
+  if(!won&&Math.hypot(x-goal.x,y-goal.y)<14){won=true;document.getElementById('code').style.display='block';try{navigator.vibrate&&navigator.vibrate([80,60,200])}catch(e){}}
+  draw();requestAnimationFrame(step)}
+function draw(){g.clearRect(0,0,cv.width,cv.height);g.fillStyle='#8FD6C8';
+  M.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='1')g.fillRect(i*C,j*C,C,C)}));
+  g.fillStyle='#3DDC84';g.beginPath();g.arc(goal.x,goal.y,15,0,7);g.fill();
+  g.fillStyle=won?'#3DDC84':'#FFD166';g.beginPath();g.arc(x,y,R,0,7);g.fill()}
+function onOri(e){if(e.gamma==null)return;ax=Math.max(-1,Math.min(1,e.gamma/30));ay=Math.max(-1,Math.min(1,(e.beta-10)/30))}
+const keys={};addEventListener('keydown',e=>{keys[e.key]=1;kx()});addEventListener('keyup',e=>{keys[e.key]=0;kx()});
+function kx(){ax=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);ay=(keys.ArrowDown?1:0)-(keys.ArrowUp?1:0)}
+document.getElementById('go').onclick=async()=>{
+  try{if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission()}catch(e){}
+  addEventListener('deviceorientation',onOri);
+  document.getElementById('go').hidden=true;cv.hidden=false;run=true;draw();step()};
+</script>
+</body></html>
