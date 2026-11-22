@@ -18,17 +18,17 @@ const M=[
 "1000000X000X1001",
 "1000X00000001001",
 "1111111111001001",
-"1X000X0000001001",
+"10000X0000001001",
 "1000000X00001001",
 "1001111111111001",
 "10010000000X1001",
 "10X1000000001001",
 "1001111001001001",
-"1000X000010000X1",
-"10000000X1000001",
+"1000X00001000001",
+"1X00000001000001",
 "1111111111111001",
-"1000000001X00001",
 "1000000001000001",
+"10000000010000X1",
 "1001111001001111",
 "10000010010000X1",
 "1000001001000001",
@@ -42,11 +42,11 @@ const wall=(cx,cy)=>{const r=M[cy];return !r||r[cx]==='1'||r[cx]===undefined};
 let goal,holes=[],falls=0,hist=[];M.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='X')holes.push({x:i*C+C/2,y:j*C+C/2})}));M.forEach((r,j)=>{const i=r.indexOf('E');if(i>=0)goal={x:i*C+C/2,y:j*C+C/2}});
 function hit(px,py){for(const[dx,dy]of[[R,0],[-R,0],[0,R],[0,-R],[R*.7,R*.7],[-R*.7,R*.7],[R*.7,-R*.7],[-R*.7,-R*.7]]){if(wall(Math.floor((px+dx)/C),Math.floor((py+dy)/C)))return true}return false}
 function step(){if(!run)return;vx=(vx+ax*.28)*.96;vy=(vy+ay*.28)*.96;
-  const sp=Math.hypot(vx,vy);if(sp>3.6){vx*=3.6/sp;vy*=3.6/sp}
+  const sp=Math.hypot(vx,vy);if(sp>3.2){vx*=3.2/sp;vy*=3.2/sp}
   if(!hit(x+vx,y))x+=vx;else vx*=-.3;
   if(!hit(x,y+vy))y+=vy;else vy*=-.3;
   hist.push({x,y});if(hist.length>400)hist.shift();
-  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<6.5){const b=hist[Math.max(0,hist.length-90)]||{x:28.5,y:28.5};x=b.x;y=b.y;hist.length=Math.max(0,hist.length-90);vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים קצת אחורה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
+  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<5.5){const b=hist[Math.max(0,hist.length-90)]||{x:28.5,y:28.5};x=b.x;y=b.y;hist.length=Math.max(0,hist.length-90);vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים קצת אחורה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
   if(!won&&Math.hypot(x-goal.x,y-goal.y)<8){won=true;document.getElementById('code').style.display='block';try{navigator.vibrate&&navigator.vibrate([80,60,200])}catch(e){}}
   draw();requestAnimationFrame(step)}
 function draw(){g.clearRect(0,0,cv.width,cv.height);g.fillStyle='#8FD6C8';
