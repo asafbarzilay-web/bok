@@ -34,6 +34,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
   <div class="k" id="qk"></div>
   <div class="q" id="qt"></div>
   <input id="ans" placeholder="התשובה שלי" autocomplete="off">
+  <input id="ans2" autocomplete="off" hidden>
   <div class="fb" id="fb"></div>
   <div class="row">
     <button class="btn" id="chk">בדיקה</button>
@@ -60,10 +61,14 @@ const SONG=[];
 const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1KhhNnQ4NpIEhsCtjRUcebJsCorne7bY6BEYSLHu7MC7tw/exec';
 function log(ev,o){if(!ENDPOINT||!S)return;const d=Object.assign({sid:S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
   try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)}).catch(()=>{})}catch(e){}}
+const FIELDS={2:['שם השיר','שנה']};
 const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","איזה מקום נמצא כאן?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
-const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJhbHQiOiBbWyJ5b3VuZyIsICJmb2xrIiwgIjIwMDYiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyIsICIyMDA2Il0sIFsi15nXkNeg15IiLCAi16TXlden16EiLCAiMjAwNiJdXX0sICI0IjogeyJudW0iOiBbWzMyMCwgMzYwXSwgWzExNTAsIDEzMDBdXX0sICI1IjogeyJhbnkiOiBbItek15nXoNeS15XXldeZ158iLCAi16TXmdeg15LXldeZ158iLCAicGVuZ3VpbiJdfSwgIjYiOiB7ImFueSI6IFsi15vXldeq15wiXX0sICI3IjogeyJhbnkiOiBbIteQ15HXmNeZ15ciXX0sICI4IjogeyJhbnkiOiBbIten15XXkNec15QiLCAia3VhbGEiXX0sICI5IjogeyJhbnkiOiBbItee16bXnNee15QiLCAi157Xptec157XkCJdfSwgIjEwIjogeyJhbnkiOiBbIten16fXmNeV16EiLCAiY2FjdHVzIl19fQ=="),c=>c.charCodeAt(0))));
+const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJwYXJ0cyI6IFt7ImFsdCI6IFtbInlvdW5nIiwgImZvbGsiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyJdLCBbIteZ15DXoNeSIiwgItek15XXp9ehIl1dfSwgeyJhbHQiOiBbWyIyMDA2Il1dfV19LCAiNCI6IHsibnVtIjogW1szMjAsIDM2MF0sIFsxMTUwLCAxMzAwXV19LCAiNSI6IHsiYW55IjogWyLXpNeZ16DXkteV15XXmdefIiwgItek15nXoNeS15XXmdefIiwgInBlbmd1aW4iXX0sICI2IjogeyJhbnkiOiBbIteb15XXqtecIl19LCAiNyI6IHsiYW55IjogWyLXkNeR15jXmdeXIl19LCAiOCI6IHsiYW55IjogWyLXp9eV15DXnNeUIiwgImt1YWxhIl19LCAiOSI6IHsiYW55IjogWyLXntem15zXnteUIiwgItee16bXnNee15AiXX0sICIxMCI6IHsiYW55IjogWyLXp9en15jXldehIiwgImNhY3R1cyJdfX0="),c=>c.charCodeAt(0))));
 const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
+function rule(k,a){const n=norm(a);if(k.alt)return k.alt.some(g=>g.every(w=>n.includes(norm(w))));if(k.all)return k.all.every(w=>n.includes(norm(w)));return k.any.some(w=>n.includes(norm(w)))}
+function partsOf(i,a){const k=K[i+1];const v=a.split(' | ');return k.parts.map((p,j)=>!!(v[j]&&norm(v[j]))&&rule(p,v[j]))}
 function check(i,a){const k=K[i+1],n=norm(a);if(!n)return null;
+  if(k.parts){const v=a.split(' | ');if(v.some(x=>!norm(x||'')))return null;return partsOf(i,a).every(Boolean)}
   if(k.song)return SONG.length?SONG.some(w=>n.includes(norm(w))):'wait';
   if(k.num){const nums=(a.replace(/,/g,'').match(/\d+(\.\d+)?/g)||[]).map(Number);return nums.some(v=>k.num.some(([lo,hi])=>v>=lo&&v<=hi))}
   if(k.alt)return k.alt.some(g=>g.every(w=>n.includes(norm(w))));
@@ -75,7 +80,8 @@ const $=id=>document.getElementById(id);
 function show(w){['start','quiz','end'].forEach(x=>$(x).hidden=x!==w)}
 function bar(){$('bar').innerHTML=Q.map((_,i)=>'<i class="'+(S.res[i]===true?'ok':S.res[i]==='wait'?'wait':S.tries[i]?'bad':'')+(i===S.cur?' now':'')+'"></i>').join('')}
 function ask(){const i=S.cur;$('who2').textContent=S.name+' · לא אני? התחלה מחדש';$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
-  $('ans').value=S.ans[i]||'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
+  const F=FIELDS[i],pv=(S.ans[i]||'').split(' | ');$('ans2').hidden=!F;$('ans').placeholder=F?F[0]:'התשובה שלי';if(F)$('ans2').placeholder=F[1];
+  $('ans').value=F?(pv[0]||''):(S.ans[i]||'');$('ans2').value=F?(pv[1]||''):'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
   if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);bar();setTimeout(()=>$('ans').focus(),50)}
 function done(r){$('fb').textContent=r===true?'✅ נכון!':'📝 נרשם – המורה יבדוק';$('fb').className='fb '+(r===true?'ok':'wait');
   $('chk').hidden=true;$('sk').hidden=true;$('nx').hidden=false;$('nx').focus()}
@@ -85,11 +91,12 @@ function nextQ(){const order=[...Array(Q.length).keys()].map(k=>(S.cur+1+k)%Q.le
 $('go').onclick=()=>{const nm=$('nm').value.trim();if(!nm){$('nm').focus();return}
   S={sid:Math.random().toString(36).slice(2,8),name:nm,t0:Date.now(),cur:0,ans:[],res:[],tries:[],skipped:[]};save();log('start');show('quiz');ask()};
 $('nm').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
-$('chk').onclick=()=>{const i=S.cur,a=$('ans').value;const r=check(i,a);if(r===null){$('ans').focus();return}
+$('chk').onclick=()=>{const i=S.cur,a=FIELDS[i]?$('ans').value.trim()+' | '+$('ans2').value.trim():$('ans').value;const r=check(i,a);if(r===null){(FIELDS[i]&&$('ans').value.trim()?$('ans2'):$('ans')).focus();return}
   S.ans[i]=a;S.tries[i]=(S.tries[i]||0)+1;log('try',{q:i+1,a:a,r:r===true?'✅':r==='wait'?'📝':'❌',n:S.tries[i]});
   if(r===true||r==='wait'){S.res[i]=r;S.skipped[i]=false;save();bar();done(r)}
-  else{S.res[i]=false;save();bar();$('fb').textContent='❌ לא נכון. נסו שוב!';$('fb').className='fb bad';$('ans').select()}};
-$('ans').onkeydown=e=>{if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
+  else{S.res[i]=false;save();bar();let msg='❌ לא נכון. נסו שוב!';if(FIELDS[i]){const p=partsOf(i,a);msg=p.map((ok,j)=>(ok?'✅ ':'❌ ')+FIELDS[i][j]).join(' · ')}$('fb').textContent=msg;$('fb').className='fb bad';$('ans').select()}};
+$('ans2').onkeydown=e=>{if(e.key==='Enter')$('nx').hidden?$('chk').click():$('nx').click()};
+$('ans').onkeydown=e=>{if(e.key==='Enter'&&FIELDS[S.cur]&&!$('ans2').value.trim()){$('ans2').focus();return}if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
 $('nx').onclick=nextQ;
 $('sk').onclick=()=>{S.skipped[S.cur]=true;save();log('skip',{q:S.cur+1});nextQ()};
 function finish(){if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===true).length+'/'+Q.length})}S.review=false;save();show('end');
