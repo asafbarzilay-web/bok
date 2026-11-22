@@ -40,6 +40,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
     <button class="btn" id="nx" hidden>לשאלה הבאה ←</button>
     <button class="btn ghost" id="sk">דלגו</button>
   </div>
+  <p style="margin-top:16px"><a href="#" id="who2" class="small" style="color:#8FD6C8"></a></p>
 </div>
 
 <div class="card" id="end" hidden>
@@ -58,7 +59,7 @@ const SONG=[];
 // Apps Script web-app URL (Google Sheet of results)
 const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1KhhNnQ4NpIEhsCtjRUcebJsCorne7bY6BEYSLHu7MC7tw/exec';
 function log(ev,o){if(!ENDPOINT||!S)return;const d=Object.assign({sid:S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
-  try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})}catch(e){}}
+  try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)}).catch(()=>{})}catch(e){}}
 const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ומי שר אותו?","מה מהירות הקול באוויר?","מבוך – מה מילת הקוד?","איזה מקום נמצא כאן?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","הודעה ברטט – מה המילה?","מצפן – מה מילת הקוד?"];
 const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbnkiOiBbIteb15zXoNeZ16oiLCAiYW5lbW9uZSJdfSwgIjIiOiB7ImFsbCI6IFsi15fXqteV15wiLCAi16nXldeg15AiLCAi16nXoNeZIl19LCAiMyI6IHsic29uZyI6IHRydWV9LCAiNCI6IHsibnVtIjogW1szMjAsIDM2MF0sIFsxMTUwLCAxMzAwXV19LCAiNSI6IHsiYW55IjogWyLXpNeZ16DXkteV15XXmdefIiwgItek15nXoNeS15XXmdefIiwgInBlbmd1aW4iXX0sICI2IjogeyJhbnkiOiBbIteb15XXqtecIl19LCAiNyI6IHsiYW55IjogWyLXkNeR15jXmdeXIl19LCAiOCI6IHsiYW55IjogWyLXp9eV15DXnNeUIiwgImt1YWxhIl19LCAiOSI6IHsiYW55IjogWyLXntem15zXnteUIiwgItee16bXnNee15AiXX0sICIxMCI6IHsiYW55IjogWyLXp9en15jXldehIiwgImNhY3R1cyJdfX0="),c=>c.charCodeAt(0))));
 const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
@@ -72,7 +73,7 @@ const save=()=>{try{localStorage.setItem('tel_final',JSON.stringify(S))}catch(e)
 const $=id=>document.getElementById(id);
 function show(w){['start','quiz','end'].forEach(x=>$(x).hidden=x!==w)}
 function bar(){$('bar').innerHTML=Q.map((_,i)=>'<i class="'+(S.res[i]===true?'ok':S.res[i]==='wait'?'wait':S.tries[i]?'bad':'')+(i===S.cur?' now':'')+'"></i>').join('')}
-function ask(){const i=S.cur;$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
+function ask(){const i=S.cur;$('who2').textContent=S.name+' · לא אני? התחלה מחדש';$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
   $('ans').value=S.ans[i]||'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
   if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);bar();setTimeout(()=>$('ans').focus(),50)}
 function done(r){$('fb').textContent=r===true?'✅ נכון!':'📝 נרשם – המורה יבדוק';$('fb').className='fb '+(r===true?'ok':'wait');
@@ -97,7 +98,9 @@ function finish(){if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===
   $('tbl').innerHTML=Q.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+(S.res[i]===true?'✅':S.res[i]==='wait'?'📝':'⬜')+'</td><td>'+(S.ans[i]?S.ans[i].replace(/</g,'&lt;'):'—')+'</td></tr>').join('');
   $('back').hidden=!Q.some((_,i)=>S.res[i]!==true&&S.res[i]!=='wait')}
 $('back').onclick=()=>{S.skipped=[];S.review=true;S.t1=null;const n=Q.findIndex((_,i)=>S.res[i]!==true&&S.res[i]!=='wait');S.cur=n;save();show('quiz');ask()};
-$('reset').onclick=e=>{e.preventDefault();if(confirm('למחוק את התשובות ולהתחיל מחדש?')){localStorage.removeItem('tel_final');location.reload()}};
+function reset(e){e.preventDefault();if(confirm('להתחיל מההתחלה עם שם אחר?')){try{localStorage.removeItem('tel_final')}catch(x){}location.reload()}}
+$('reset').onclick=reset;$('who2').onclick=reset;
+if(S&&S.name&&!S.sid){S.sid=Math.random().toString(36).slice(2,8);save()}
 if(S&&S.name){if(S.t1)finish();else{show('quiz');ask()}}
 </script>
 </body></html>
