@@ -61,7 +61,7 @@ function up(){if(!down)return;down=false;document.querySelectorAll('.k.on').forE
     $('msg').className='msg good';$('msg').textContent='✅ מעולה!';try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}confetti();busy=true;
     setTimeout(()=>{cur++;busy=false;$('trace').innerHTML='&nbsp;';$('msg').textContent='';show();
       if(cur>=WORDS.length){$('code').style.display='block';$('word').textContent='🎉';kb.style.opacity=.4}},1600)}
-  else{$('msg').className='msg bad';$('msg').textContent=trace[0]!==w[0]?'❌ התחילו מהאות '+w[0]:trace[trace.length-1]!==w[w.length-1]?'❌ הרימו את האצבע על '+w[w.length-1]:'❌ פספסתם אות. נסו שוב.'}
+  else{$('msg').className='msg bad';$('msg').textContent=trace[0]!==w[0]?'❌ התחילו מהאות '+w[0]:trace[trace.length-1]!==w[w.length-1]?'❌ הרימו את האצבע על '+w[w.length-1]:'❌ עקבו אחרי כל האותיות של המילה, לפי הסדר.'}
   setTimeout(()=>{pts=[];draw()},400)}
 kb.addEventListener('pointerup',up);kb.addEventListener('pointercancel',up);
 show();
