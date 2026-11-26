@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>מקלדת החלקה</title>
+<title>המקלדת התקלקלה</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
 <style>
@@ -21,8 +21,8 @@ canvas{position:absolute;inset:0;pointer-events:none}
 .trace span{opacity:.35}.trace b{color:#3DDC84;font-size:28px}
 </style>
 </head><body>
-<h1>〰️ מקלדת החלקה</h1>
-<p>כתבו את המילה <b>בלי להרים את האצבע</b>: מניחים על האות הראשונה, מחליקים דרך כל האותיות, ומרימים רק בסוף.</p>
+<h1>⌨️ המקלדת התקלקלה</h1>
+<p>המקלדת התקלקלה ואי אפשר ללחוץ על אותיות בודדות. נסו בכל זאת לכתוב את המילה שמופיעה למעלה.</p>
 <div class="steps" id="steps"></div>
 <div class="word" id="word"></div>
 <div class="trace" id="trace">&nbsp;</div>
@@ -55,7 +55,7 @@ kb.addEventListener('pointerdown',e=>{if(cur>=WORDS.length||busy)return;e.preven
 kb.addEventListener('pointermove',e=>{if(down)add(e)});
 function up(){if(!down)return;down=false;document.querySelectorAll('.k.on').forEach(x=>x.classList.remove('on'));
   const w=WORDS[cur];
-  if(trace.length<=1){$('msg').className='msg bad';$('msg').textContent='✋ בלי להקיש! מחליקים את האצבע על האותיות.'}
+  if(trace.length<=1){$('msg').className='msg bad';$('msg').textContent='✋ אי אפשר ללחוץ על אותיות בודדות. נסו דרך אחרת.'}
   else if(trace[0]===w[0]&&trace[trace.length-1]===w[w.length-1]&&isSub(w,trace)){
     const m=marks(w,trace);$('trace').innerHTML=trace.map((c,i)=>m.has(i)?'<b>'+c+'</b>':'<span>'+c+'</span>').join('');
     $('msg').className='msg good';$('msg').textContent='✅ מעולה!';try{navigator.vibrate&&navigator.vibrate(60)}catch(x){}confetti();busy=true;
