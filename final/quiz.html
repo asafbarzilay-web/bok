@@ -43,7 +43,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 .intro{max-width:900px}
 .intro h2{margin:0 0 14px;font-size:26px;text-align:center}
 .intro p,.intro .must{text-align:center}
-.ill{background:#F2F5F4;border-radius:18px;padding:6px;width:fit-content;margin:0 auto}
+.ill{background:#221F45;border-radius:18px;padding:0;overflow:hidden;width:fit-content;margin:0 auto}
 .ill svg{display:block;height:min(30vh,230px);width:auto}
 .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
 @media(max-width:700px){.steps3{grid-template-columns:1fr}}
@@ -79,34 +79,46 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 <div class="card intro" id="intro1" hidden>
   <h2>איך זה עובד?</h2>
   <div class="ill"><svg viewBox="0 0 520 290" xmlns="http://www.w3.org/2000/svg" font-family="Heebo,Arial">
- <rect x="0" y="252" width="520" height="10" rx="4" fill="#b9c4c1"/>
- <!-- laptop -->
- <rect x="262" y="58" width="226" height="150" rx="12" fill="#2B2752" stroke="#1E1B3A" stroke-width="6"/>
- <rect x="282" y="76" width="186" height="114" rx="8" fill="#1E1B3A"/>
- <text x="375" y="98" text-anchor="middle" fill="#8FD6C8" font-size="13" font-weight="700">שאלה 3 מתוך 10</text>
- <rect x="300" y="108" width="62" height="62" fill="#fff"/>
- <g fill="#111"><rect x="304" y="112" width="16" height="16"/><rect x="342" y="112" width="16" height="16"/><rect x="304" y="150" width="16" height="16"/><rect x="326" y="132" width="8" height="8"/><rect x="338" y="146" width="8" height="8"/><rect x="326" y="152" width="8" height="12"/><rect x="346" y="134" width="8" height="8"/></g>
- <rect x="376" y="118" width="80" height="20" rx="6" fill="#2B2752" stroke="#8FD6C8"/>
- <text x="416" y="132" text-anchor="middle" fill="#F2F5F4" font-size="10">התשובה שלי</text>
- <rect x="392" y="148" width="48" height="18" rx="9" fill="#8FD6C8"/>
- <text x="416" y="161" text-anchor="middle" fill="#1E1B3A" font-size="10" font-weight="700">בדיקה</text>
- <path d="M240 208 L510 208 L496 226 L254 226 Z" fill="#8a93a6"/>
- <!-- camera beam -->
- <polygon points="214,128 282,78 282,188" fill="#FFD166" opacity=".28"/>
- <line x1="214" y1="128" x2="282" y2="78" stroke="#FFD166" stroke-width="2" stroke-dasharray="6 5"/>
- <line x1="214" y1="128" x2="282" y2="188" stroke="#FFD166" stroke-width="2" stroke-dasharray="6 5"/>
+ <defs><radialGradient id="gl" cx="70%" cy="40%" r="60%"><stop offset="0" stop-color="#8FD6C8" stop-opacity=".22"/><stop offset="1" stop-color="#8FD6C8" stop-opacity="0"/></radialGradient></defs>
+ <rect width="520" height="290" fill="#221F45"/><rect width="520" height="290" fill="url(#gl)"/>
+ <rect x="0" y="262" width="520" height="28" fill="#1A1838"/>
  <!-- chair -->
- <rect x="40" y="150" width="16" height="102" rx="6" fill="#7a5c4a"/><rect x="40" y="196" width="120" height="14" rx="6" fill="#7a5c4a"/>
- <!-- kid -->
- <rect x="70" y="138" width="78" height="66" rx="26" fill="#3DDC84"/>
- <rect x="84" y="200" width="22" height="52" rx="10" fill="#2B2752"/><rect x="112" y="200" width="22" height="52" rx="10" fill="#2B2752"/>
- <circle cx="110" cy="102" r="34" fill="#F4C9A8"/>
- <path d="M76 98 Q80 62 112 64 Q142 64 144 92 Q128 80 108 82 Q90 82 76 98Z" fill="#4a3426"/>
- <circle cx="122" cy="102" r="3.5" fill="#1E1B3A"/><circle cx="102" cy="102" r="3.5" fill="#1E1B3A"/>
- <path d="M104 116 Q113 123 122 116" stroke="#1E1B3A" stroke-width="3" fill="none" stroke-linecap="round"/>
- <path d="M140 160 Q168 150 186 138" stroke="#F4C9A8" stroke-width="13" fill="none" stroke-linecap="round"/>
- <!-- phone -->
- <g transform="rotate(-18 200 128)"><rect x="186" y="100" width="28" height="54" rx="6" fill="#1E1B3A" stroke="#F2F5F4" stroke-width="2"/><circle cx="208" cy="108" r="3" fill="#FFD166"/></g>
+ <rect x="52" y="140" width="9" height="112" rx="4" fill="#4b4780"/><rect x="52" y="206" width="104" height="9" rx="4" fill="#4b4780"/><rect x="100" y="215" width="6" height="47" fill="#4b4780"/>
+ <!-- desk -->
+ <rect x="170" y="206" width="350" height="9" rx="2" fill="#4b4780"/><rect x="470" y="215" width="7" height="47" fill="#3b3768"/>
+ <!-- laptop -->
+ <path d="M300 205 L492 205 L500 206 L292 206Z" fill="#8a93a6"/>
+ <rect x="312" y="88" width="168" height="117" rx="7" fill="#14122b" stroke="#5d5aa0" stroke-width="2"/>
+ <rect x="322" y="98" width="148" height="97" rx="3" fill="#1E1B3A"/>
+ <text x="396" y="116" text-anchor="middle" fill="#8FD6C8" font-size="11" font-weight="700">שאלה 3 מתוך 10</text>
+ <rect x="332" y="126" width="58" height="58" rx="3" fill="#F2F5F4"/>
+ <g fill="#14122b"><rect x="337" y="131" width="16" height="16"/><rect x="369" y="131" width="16" height="16"/><rect x="337" y="163" width="16" height="16"/><rect x="359" y="152" width="6" height="6"/><rect x="368" y="160" width="10" height="6"/><rect x="358" y="170" width="8" height="9"/><rect x="372" y="172" width="8" height="7"/></g>
+ <rect x="402" y="132" width="58" height="18" rx="9" fill="none" stroke="#8FD6C8" stroke-width="1.2"/>
+ <text x="431" y="145" text-anchor="middle" fill="#F2F5F4" font-size="8.5">התשובה שלי</text>
+ <rect x="410" y="160" width="42" height="16" rx="8" fill="#8FD6C8"/>
+ <text x="431" y="171.5" text-anchor="middle" fill="#1E1B3A" font-size="8.5" font-weight="700">בדיקה</text>
+ <!-- legs -->
+ <path d="M84 205 H196 a10 10 0 0 1 0 20 H128 V262 H106 V225 H84Z" fill="#3a4f8f"/>
+ <rect x="104" y="258" width="34" height="8" rx="4" fill="#E8E4F5"/>
+ <!-- torso -->
+ <path d="M78 142 Q78 118 104 118 Q130 118 134 142 L140 210 L76 210Z" fill="#6C63D9"/>
+ <path d="M78 130 Q70 112 88 106 L100 116Z" fill="#5a52c4"/>
+ <!-- head -->
+ <rect x="98" y="100" width="14" height="22" rx="5" fill="#d9a784"/>
+ <ellipse cx="108" cy="84" rx="23" ry="26" fill="#E8B896"/>
+ <path d="M85 82 Q82 54 110 54 Q134 55 132 78 Q120 66 104 70 Q92 72 85 90Z" fill="#2c2018"/>
+ <path d="M130 88 q8 3 1 9 q-4 1 -1 4" fill="#E8B896" stroke="none"/>
+ <circle cx="122" cy="84" r="2.2" fill="#14122b"/>
+ <path d="M88 70 Q108 50 128 70" stroke="#14122b" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="82" y="76" width="9" height="16" rx="4.5" fill="#14122b"/>
+ <!-- arm + phone -->
+ <path d="M96 140 Q112 178 150 178" stroke="#5a52c4" stroke-width="15" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M150 178 Q196 168 218 128" stroke="#6C63D9" stroke-width="14" fill="none" stroke-linecap="round"/>
+ <g transform="rotate(14 232 118)"><rect x="220" y="90" width="26" height="50" rx="5" fill="#0f0e22" stroke="#d9d6ee" stroke-width="1.6"/><rect x="223" y="94" width="20" height="38" rx="2" fill="#2f2a66"/><circle cx="233" cy="98" r="1.8" fill="#FFD166"/></g>
+ <circle cx="224" cy="132" r="7" fill="#E8B896"/>
+ <!-- scan beam -->
+ <polygon points="244,94 332,126 332,184 244,126" fill="#FFD166" opacity=".16"/>
+ <line x1="244" y1="94" x2="332" y2="126" stroke="#FFD166" stroke-width="1.4" stroke-dasharray="5 5"/>
+ <line x1="244" y1="126" x2="332" y2="184" stroke="#FFD166" stroke-width="1.4" stroke-dasharray="5 5"/>
 </svg></div>
   <div class="steps3">
     <div class="st3"><div class="n">💻</div><b>1. רואים במחשב</b>השאלה מופיעה כאן, על המסך.</div>
