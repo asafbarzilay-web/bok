@@ -42,6 +42,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 
 .intro{max-width:900px}
 .intro h2{margin:0 0 10px;font-size:26px}
+.intro p,.intro .must{text-align:center}
 .ill{background:#F2F5F4;border-radius:18px;padding:6px;width:fit-content;margin:0 auto}
 .ill svg{display:block;height:min(30vh,230px);width:auto}
 .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
@@ -61,6 +62,8 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 .qrs div{background:#F2F5F4;color:#1E1B3A;border-radius:16px;padding:10px;font-weight:700}
 .qrs img{width:150px;height:150px;display:block;image-rendering:pixelated}
 .must{font-size:24px;font-weight:700;color:#FFD166;margin:6px 0}
+.three{display:grid;grid-template-columns:1fr auto 1fr;gap:40px;align-items:center;margin-top:10px}
+@media(max-width:700px){.three{grid-template-columns:1fr;gap:22px}}
 </style>
 </head><body>
 <h1>📱 טלפונית – משימת סיום</h1>
@@ -115,9 +118,11 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 
 <div class="card intro" id="intro2" hidden>
   <h2>לפני שמתחילים: בדקו את הטלפון</h2>
-  <div class="two">
-    <div>
-      <div class="phone"><div class="scr">
+  <div class="must">חובה: האפליקציה של Google</div>
+  <p>בלעדיה לא תצליחו לפתור את כל השאלות.<br><b>אין לכם אותה? סרקו את הקוד שמתאים לטלפון שלכם:</b></p>
+  <div class="three">
+    <div class="qrs"><div><img src="qr-gapp-android.png" alt="">🤖 אנדרואיד</div></div>
+    <div class="phone"><div class="scr">
         <div class="app"><i style="background:#ff6b6b">📷</i>מצלמה</div>
         <div class="app"><i style="background:#3DDC84">💬</i>הודעות</div>
         <div class="app"><i style="background:#4aa3ff">🗺️</i>מפות</div>
@@ -131,16 +136,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
         <div class="app"><i style="background:#5c6bc0">📞</i>טלפון</div>
         <div class="app"><i style="background:#8d6e63">📝</i>פתקים</div>
       </div></div>
-    </div>
-    <div>
-      <div class="must">חובה: האפליקציה של Google</div>
-      <p>בלעדיה לא תצליחו לפתור את כל השאלות.</p>
-      <p><b>אין לכם אותה? סרקו והורידו עכשיו:</b></p>
-      <div class="qrs">
-        <div><img src="qr-gapp-android.png" alt="">🤖 אנדרואיד</div>
-        <div><img src="qr-gapp-ios.png" alt="">🍎 אייפון</div>
-      </div>
-    </div>
+    <div class="qrs"><div><img src="qr-gapp-ios.png" alt="">🍎 אייפון</div></div>
   </div>
   <div class="row" style="margin-top:18px"><button class="btn ghost" id="i2b">→ חזרה</button><button class="btn" id="i2">יש לי, מתחילים! 🚀</button></div>
 </div>
