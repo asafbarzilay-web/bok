@@ -30,7 +30,7 @@
 // word: מ צ ל מ ה  (Hebrew Morse)  1 = short, 3 = long
 const WORD=[[3,3],[1,3,3],[1,3,1,1],[3,3],[3,3,3]],U=230;
 const canBuzz=!!navigator.vibrate&&!/iPhone|iPad|iPod/.test(navigator.userAgent);
-if(!canBuzz)document.getElementById('ios').hidden=false;
+if(!canBuzz){const p=document.querySelector('p');p.innerHTML='הדפדפן בטלפון הזה לא יכול לרטוט, אז במקום רטט תשמעו <b>צליל</b>: צליל קצר = • , צליל ארוך = ▬. הפעילו את הקול (ודאו שהטלפון לא על שקט). הטבלה נמצאת בשקף.'}
 let cur=0,busy=false,ac=null;
 const st=document.getElementById('st'),dots=document.getElementById('dots');
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
