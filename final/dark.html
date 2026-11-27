@@ -12,8 +12,7 @@ body{justify-content:center;min-height:100vh;gap:16px}
 .c i{position:absolute;font-style:normal;color:#5d5aa0;font-size:26px}
 .c b{position:relative;opacity:0}
 #sky{position:relative;width:84px;height:84px;font-size:68px;line-height:84px}
-#sky span{position:absolute;inset:0;transition:opacity .25s}
-#moon{opacity:0}
+#sky span{position:absolute;inset:0;transition:filter .25s;filter:drop-shadow(0 0 16px #FFD166)}
 #bar{width:280px;height:6px;border-radius:3px;background:#2B2752;overflow:hidden}
 #bar div{height:100%;width:0;background:#8FD6C8;transition:width .15s linear}
 #st{font-size:15px;opacity:.75;min-height:22px}
@@ -24,7 +23,7 @@ body{justify-content:center;min-height:100vh;gap:16px}
 <div class="small" id="priv">הדף משתמש במצלמה. שום תמונה לא נשמרת ולא נשלחת לשום מקום.</div>
 <button class="btn" id="start">התחלה</button>
 <h1>יש כאן הודעה</h1>
-<div id="sky"><span id="sun">☀️</span><span id="moon">🌙</span></div>
+<div id="sky"><span id="bulb">💡</span></div>
 <div id="cells"></div>
 <div id="bar"><div></div></div>
 <div id="st"></div>
@@ -48,12 +47,12 @@ function tick(){
     hist.push([now,l]);while(hist.length&&now-hist[0][0]>5000)hist.shift();
     const base=Math.max(40,...hist.map(h=>h[1]));
     const d=Math.max(1-l/base,l<12?1:0);
-    sky=sky*0.6+Math.min(1,d/0.55)*0.4;$('sun').style.opacity=1-sky;$('moon').style.opacity=sky;
+    sky=sky*0.6+Math.min(1,d/0.55)*0.4;$('bulb').style.filter='grayscale('+sky+') brightness('+(1-sky*0.65)+') drop-shadow(0 0 '+(16*(1-sky))+'px #FFD166)';
     p=Math.max(0,Math.min(1,p+(d>=0.55?dt*UP:-dt*DOWN)));
     render();
     if(p>=1){finish();return}
   }
-  const s=(now-t0)/1000;if(s>20)$('cdot').classList.add('show');if(s>45&&p===0)$('st').textContent='ההודעה מתעוררת רק בלילה';
+  const s=(now-t0)/1000;if(s>20)$('cdot').classList.add('show');if(s>45&&p===0)$('st').textContent='ההודעה נראית רק בחושך';
   setTimeout(tick,100)}
 function finish(){done=true;render();$('code').style.display='block';$('cdot').classList.remove('show');try{navigator.vibrate&&navigator.vibrate([80,60,160])}catch(e){}try{stream.getTracks().forEach(t=>t.stop())}catch(e){}confetti()}
 $('start').onclick=async()=>{
