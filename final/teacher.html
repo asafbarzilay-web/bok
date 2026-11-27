@@ -29,6 +29,7 @@ tr.det td{background:#1E1B3A;text-align:right;font-size:14px;line-height:1.7}
 <div class="stats" id="stats"></div>
 <label class="small" style="display:block;margin:6px 0 10px"><input type="checkbox" id="all" onchange="load()"> הצג את כל התלמידים <span id="hid"></span></label>
 <table id="t"></table>
+<div id="fbs" style="margin-top:20px"></div>
 <p class="small">לחיצה על שם פותחת את כל הניסיונות. ✅ נכון · ❌ טעה ועוד לא פתר · ⏭ דילג · 📝 לבדיקת המורה · המספר הקטן = מספר ניסיונות.</p>
 <script>
 const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1KhhNnQ4NpIEhsCtjRUcebJsCorne7bY6BEYSLHu7MC7tw/exec';
@@ -43,11 +44,12 @@ async function load(){
   if(data.error){document.getElementById('sub').innerHTML='<div class="err">מפתח שגוי</div>';return}
   const P={};
   for(const [t,sid,name,ev,q,a,r,n,sec] of data.rows){
-    const p=P[sid]||(P[sid]={sid,name,start:t,last:t,sec:0,q:{},log:[],fin:null});
+    const p=P[sid]||(P[sid]={sid,name,start:t,last:t,sec:0,q:{},log:[],fin:null,fb:[]});
     p.last=Math.max(p.last,t);p.sec=Math.max(p.sec,+sec||0);
     if(ev==='try'){const c=p.q[q]||(p.q[q]={n:0,st:'bad'});c.n=Math.max(c.n,+n||c.n+1);if(r==='✅')c.st='ok';else if(r==='📝'&&c.st!=='ok')c.st='wait';p.log.push([sec,q,a,r])}
     if(ev==='skip'){const c=p.q[q]||(p.q[q]={n:0,st:'skip'});if(c.st==='bad'&&!c.n)c.st='skip';if(!c.n)c.st='skip';p.log.push([sec,q,'—','⏭'])}
     if(ev==='finish'){p.fin=r}
+    if(ev==='feedback')p.fb.push([q,a]);
   }
   const L=Object.values(P).map(p=>{p.score=Object.values(p.q).filter(c=>c.st==='ok').length;p.wrong=Object.values(p.q).reduce((s,c)=>s+Math.max(0,c.n-(c.st==='ok'||c.st==='wait'?1:0)),0);return p})
     .sort((a,b)=>b.score-a.score||a.sec-b.sec);
@@ -65,6 +67,7 @@ async function load(){
     if(open[p.sid])h+=`<tr class="det"><td colspan="${NQ+5}">${p.log.map(([s,q,a,r])=>`${fmt(s)} · שאלה ${q} · ${r} ${esc(a)}`).join('<br>')||'אין עדיין ניסיונות'}</td></tr>`;
   }
   document.getElementById('t').innerHTML=h;
+  const F=L.filter(p=>p.fb.length);document.getElementById('fbs').innerHTML=F.length?'<h3>משוב על הקורס ('+F.length+')</h3>'+F.map(p=>'<div class="stat" style="margin:6px 0"><b style="font-size:16px">'+esc(p.name)+'</b>'+p.fb.map(([q,a])=>'<div><span style="color:#8FD6C8">'+esc(q)+'</span> '+esc(a)+'</div>').join('')+'</div>').join(''):'';
 }
 function tog(s){open[s]=!open[s];load()}
 load();setInterval(load,10000);

@@ -26,6 +26,8 @@ body{justify-content:flex-start;padding-top:28px}
 .media{position:relative;overflow:hidden}
 #ytbox{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .cover{position:absolute;inset:0;background:#F2F5F4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:2}
+textarea{width:100%;font:400 17px Heebo,Arial,sans-serif;padding:10px 12px;border-radius:12px;border:2px solid #8FD6C8;background:#1E1B3A;color:#F2F5F4;margin:4px 0 10px;resize:none;text-align:right}
+.fl{display:block;text-align:right;font-weight:700;font-size:15px;margin-top:6px}
 input{width:100%;font:400 22px Heebo,Arial,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid #8FD6C8;background:#1E1B3A;color:#F2F5F4;text-align:center;margin:12px 0}
 .k{color:#8FD6C8;font-size:15px;font-weight:700}
 .q{font-size:24px;font-weight:700;margin:6px 0 2px}
@@ -183,6 +185,15 @@ td{padding:6px;border-bottom:1px solid #3a3566}
   
 </div>
 
+<div class="card" id="fbk" hidden>
+  <div class="q">עוד רגע וסיימתם 🙂 קצת משוב על הקורס</div>
+  <p class="small" style="margin:6px 0 10px">הכל אופציונלי. אפשר לכתוב כמה מילים.</p>
+  <label class="fl">איך היה?</label><textarea id="f1" rows="2"></textarea>
+  <label class="fl">מה היית משפר?</label><textarea id="f2" rows="2"></textarea>
+  <label class="fl">מה למדת?</label><textarea id="f3" rows="2"></textarea>
+  <button class="btn" id="fsend" style="margin-top:12px">סיום</button>
+</div>
+
 <div class="card" id="end" hidden>
   <div id="who" class="q"></div>
   <div class="big" id="score"></div>
@@ -249,7 +260,7 @@ function check(i,a){const k=K[i+1],n=norm(a);if(!n)return null;
 let S;try{S=JSON.parse(localStorage.getItem('tel_quiz')||'null')}catch(e){}
 const save=()=>{if(S&&S.test)return;try{localStorage.setItem('tel_quiz',JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
-function show(w){$('rst').hidden=(w=='start');['start','intro1','intro2','quiz','end'].forEach(x=>$(x).hidden=x!==w)}
+function show(w){$('rst').hidden=(w=='start');['start','intro1','intro2','quiz','fbk','end'].forEach(x=>$(x).hidden=x!==w)}
 function bar(){$('bar').innerHTML=Q.map((_,i)=>'<i class="'+(S.res[i]===true?'ok':S.res[i]==='wait'?'wait':S.tries[i]?'bad':'')+(i===S.cur?' now':'')+'"></i>').join('')}
 function ask(){const i=S.cur;$('media').innerHTML=MEDIA[i];$('qs').textContent=SUB[i];wireMedia(i);$('qk').textContent='שאלה '+(i+1)+' מתוך '+Q.length;$('qt').textContent=Q[i];
   const V=VOICE[i];if(rec){try{rec.abort()}catch(e){}rec=null}$('voice').hidden=!V||!SR;$('vtype').hidden=true;$('mic').disabled=false;$('mic').className='btn';$('mic').textContent='🎤 לחצו ודברו';$('heard').textContent=V?(S.ans[i]?'🎧 '+S.ans[i]:''):'';$('ans').hidden=!!V&&!!SR;
@@ -286,12 +297,13 @@ $('mic').onclick=()=>{const i=S.cur;if(rec){try{rec.stop()}catch(e){}return}
     else{$('fb').textContent='לא שמעתי אתכם. נסו שוב, קרוב יותר למחשב.';$('fb').className='fb bad'}};
   try{rec.start()}catch(e){rec=null;rs()}};
 $('sk').onclick=()=>{S.skipped[S.cur]=true;save();log('skip',{q:S.cur+1});nextQ()};
-function finish(){stopSong();if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===true).length+'/'+Q.length})}S.review=false;save();show('end');
+function finish(){stopSong();if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.filter(r=>r===true).length+'/'+Q.length})}S.review=false;save();show(S.fb||S.test?'end':'fbk');
   const ok=S.res.filter(r=>r===true).length,w=S.res.filter(r=>r==='wait').length;
   $('who').textContent=S.name;$('score').textContent=ok+' / '+Q.length;
   const m=Math.round((S.t1-S.t0)/60000);$('tm').textContent='זמן: '+m+' דקות'+(w?' · שאלה אחת מחכה לבדיקת המורה':'');
   $('tbl').innerHTML=Q.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+(S.res[i]===true?'✅':S.res[i]==='wait'?'📝':'⬜')+'</td><td>'+(S.ans[i]?S.ans[i].replace(/</g,'&lt;'):'—')+'</td></tr>').join('');
   $('back').hidden=!Q.some((_,i)=>S.res[i]!==true&&S.res[i]!=='wait')}
+$('fsend').onclick=()=>{[['f1','איך היה?'],['f2','מה היית משפר?'],['f3','מה למדת?']].forEach(([id,q])=>{const v=$(id).value.trim();if(v)log('feedback',{q:q,a:v})});S.fb=1;save();show('end');scrollTo(0,0)};
 $('back').onclick=()=>{S.skipped=[];S.review=true;S.t1=null;const n=Q.findIndex((_,i)=>S.res[i]!==true&&S.res[i]!=='wait');S.cur=n;save();show('quiz');ask()};
 function reset(e){e.preventDefault();if(confirm('להתחיל מההתחלה עם שם אחר?')){try{localStorage.removeItem('tel_quiz')}catch(x){}location.reload()}}
 $('rst').onclick=reset;
