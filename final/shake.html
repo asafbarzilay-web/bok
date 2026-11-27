@@ -36,7 +36,7 @@ const grid=document.getElementById('grid'),cells=[];
 WORDS.forEach((w,wi)=>{const r=document.createElement('div');r.className='row';for(let k=0;k<w.length;k++){const c=document.createElement('div');c.className='cell';if(k===0){const n=document.createElement('span');n.className='num';n.textContent=wi+1;c.appendChild(n)}r.appendChild(c);cells.push(c)}grid.appendChild(r)});
 const rnd=n=>Math.random()*n|0,shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 // tiles: one per letter instance, tile.slot = current cell index
-let slotLetter,tiles=[],locked=Array(N).fill(false),solved=false,busy=false,lastShake=0,sensor=false,needTap=false,started=false;
+let slotLetter,tiles=[],locked=Array(N).fill(false),solved=false,busy=false,lastShake=0,sensor=false,needTap=false,started=false,miss=0;   // miss = consecutive shakes that fixed nothing
 function deranged(){let p;do{p=shuffle(target)}while(p.some((c,i)=>c===target[i]));return p}
 slotLetter=deranged();
 function pos(s){const c=cells[s];return [c.offsetLeft+c.parentElement.offsetLeft,c.offsetTop+c.parentElement.offsetTop]}
@@ -48,14 +48,13 @@ function plan(){      // returns new slotLetter: at most ONE new correct letter 
   const free=[];for(let s=0;s<N;s++)if(!locked[s])free.push(s);
   if(free.length<=1)return slotLetter.slice();
   const letters=free.map(s=>slotLetter[s]);
-  const lockOne=Math.random()<P_LOCK;
+  const lockOne=free.length<=2||miss>=3||Math.random()<P_LOCK;   // the last two letters always settle together   // after 3 misses in a row the 4th shake always fixes a letter
   let pick=-1,pool=letters.slice(),fs=free.slice();
   if(lockOne){pick=free[rnd(free.length)];const i=pool.indexOf(target[pick]);pool.splice(i,1);fs=free.filter(s=>s!==pick)}
   // shuffle the rest so that NO other free slot becomes correct
   let sh,tries=0;do{sh=shuffle(pool);tries++}while(tries<200&&sh.some((c,k)=>c===target[fs[k]]));
-  const bad=sh.some((c,k)=>c===target[fs[k]]);
   const next=slotLetter.slice();if(pick>=0)next[pick]=target[pick];
-  fs.forEach((s,k)=>next[s]=bad?slotLetter[s]:sh[k]);   // (only happens when no derangement exists)
+  fs.forEach((s,k)=>next[s]=sh[k]);   // (if no derangement exists, extra letters may settle too)
   return next}
 async function doShuffle(){
   if(solved||busy||!started)return;busy=true;
@@ -69,7 +68,9 @@ async function doShuffle(){
   free.forEach(s=>{const i=pending.findIndex(t=>t.ch===next[s]);const t=pending.splice(i,1)[0];place(t,s)});
   slotLetter=next;await wait(150);
   mov.forEach(t=>t.el.classList.remove('shaking'));
-  tiles.forEach(t=>{if(!locked[t.slot]&&t.ch===target[t.slot]){locked[t.slot]=true;t.el.classList.add('ok','pop');setTimeout(()=>t.el.classList.remove('pop'),500)}});
+  let gained=0;
+  tiles.forEach(t=>{if(!locked[t.slot]&&t.ch===target[t.slot]){gained++;locked[t.slot]=true;t.el.classList.add('ok','pop');setTimeout(()=>t.el.classList.remove('pop'),500)}});
+  miss=gained?0:miss+1;
   const left=[];for(let s=0;s<N;s++)if(!locked[s])left.push(s);
   if(left.length===1){const s=left[0];locked[s]=true;tiles.find(t=>t.slot===s).el.classList.add('ok','pop')}
   if(locked.every(Boolean)){solved=true;tiles.forEach(t=>place(t,t.slot));await wait(300);confetti();try{navigator.vibrate&&navigator.vibrate([80,60,160])}catch(e){}}
