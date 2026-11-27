@@ -22,12 +22,12 @@ td.c{min-width:44px}
 tr.det td{background:#1E1B3A;text-align:right;font-size:14px;line-height:1.7}
 .err{background:#6a2b3a;padding:14px;border-radius:12px}
 .small{font-size:13px;opacity:.7}
-.trash{background:none;border:0;font-size:16px;cursor:pointer;opacity:.5}.trash:hover{opacity:1}
 </style>
 </head><body>
 <h1>📊 טלפונית – משימת סיום</h1>
 <div class="sub" id="sub">טוען…</div>
 <div class="stats" id="stats"></div>
+<label class="small" style="display:block;margin:6px 0 10px"><input type="checkbox" id="all" onchange="load()"> הצג את כל התלמידים <span id="hid"></span></label>
 <table id="t"></table>
 <p class="small">לחיצה על שם פותחת את כל הניסיונות. ✅ נכון · ❌ טעה ועוד לא פתר · ⏭ דילג · 📝 לבדיקת המורה · המספר הקטן = מספר ניסיונות.</p>
 <script>
@@ -51,24 +51,21 @@ async function load(){
   }
   const L=Object.values(P).map(p=>{p.score=Object.values(p.q).filter(c=>c.st==='ok').length;p.wrong=Object.values(p.q).reduce((s,c)=>s+Math.max(0,c.n-(c.st==='ok'||c.st==='wait'?1:0)),0);return p})
     .sort((a,b)=>b.score-a.score||a.sec-b.sec);
+  const hidden=L.filter(p=>p.sec<=60).length;
+  document.getElementById('hid').textContent=hidden?'('+hidden+' מוסתרים, עבדו דקה או פחות)':'';
+  const shown=document.getElementById('all').checked?L:L.filter(p=>p.sec>60);
   document.getElementById('sub').textContent='מתעדכן כל 10 שניות · עדכון אחרון '+new Date().toLocaleTimeString('he-IL');
-  const fin=L.filter(p=>p.fin).length;
-  document.getElementById('stats').innerHTML=`<div class="stat"><b>${L.length}</b>תלמידים</div><div class="stat"><b>${fin}</b>סיימו</div><div class="stat"><b>${L.length?(L.reduce((s,p)=>s+p.score,0)/L.length).toFixed(1):0}</b>ממוצע נכונות</div>`;
-  let h='<tr><th>שם</th>'+[...Array(NQ)].map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'<th>ציון</th><th>טעויות</th><th>זמן</th><th>מצב</th><th></th></tr>';
-  for(const p of L){
+  const fin=shown.filter(p=>p.fin).length;
+  document.getElementById('stats').innerHTML=`<div class="stat"><b>${shown.length}</b>תלמידים</div><div class="stat"><b>${fin}</b>סיימו</div><div class="stat"><b>${shown.length?(shown.reduce((s,p)=>s+p.score,0)/shown.length).toFixed(1):0}</b>ממוצע נכונות</div>`;
+  let h='<tr><th>שם</th>'+[...Array(NQ)].map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'<th>ציון</th><th>טעויות</th><th>זמן</th><th>מצב</th></tr>';
+  for(const p of shown){
     h+=`<tr><td class="nm" onclick="tog('${p.sid}')">${esc(p.name)}</td>`;
     for(let i=1;i<=NQ;i++){const c=p.q[i];h+=c?`<td class="c ${c.st}">${{ok:'✅',bad:'❌',wait:'📝',skip:'⏭'}[c.st]}${c.n>1?'<span class="n">'+c.n+'</span>':''}</td>`:'<td class="c"></td>'}
-    h+=`<td><b>${p.score}</b></td><td>${p.wrong}</td><td>${fmt(p.sec)}</td><td class="${p.fin?'done':'live'}">${p.fin?'סיים':'עובד…'}</td><td><button class="trash" title="מחיקה" onclick="del('${p.sid}','${esc(p.name).replace(/'/g,'')}')">🗑</button></td></tr>`;
-    if(open[p.sid])h+=`<tr class="det"><td colspan="${NQ+6}">${p.log.map(([s,q,a,r])=>`${fmt(s)} · שאלה ${q} · ${r} ${esc(a)}`).join('<br>')||'אין עדיין ניסיונות'}</td></tr>`;
+    h+=`<td><b>${p.score}</b></td><td>${p.wrong}</td><td>${fmt(p.sec)}</td><td class="${p.fin?'done':'live'}">${p.fin?'סיים':'עובד…'}</td></tr>`;
+    if(open[p.sid])h+=`<tr class="det"><td colspan="${NQ+5}">${p.log.map(([s,q,a,r])=>`${fmt(s)} · שאלה ${q} · ${r} ${esc(a)}`).join('<br>')||'אין עדיין ניסיונות'}</td></tr>`;
   }
   document.getElementById('t').innerHTML=h;
 }
-async function del(sid,name){
-  if(!confirm('למחוק את "'+name+'" מהגיליון?\nאי אפשר לבטל (אפשר לשחזר רק מהיסטוריית הגרסאות של הגיליון).'))return;
-  try{const r=await (await fetch(ENDPOINT+'?key='+encodeURIComponent(KEY)+'&del='+encodeURIComponent(sid))).json();
-    if(r.error){alert('שגיאה: '+r.error);return}
-    if(r.deleted===undefined){alert('הסקריפט בגיליון עדיין בגרסה הישנה. צריך להדביק את Code.gs החדש ולפרוס גרסה חדשה (פריסה ← ניהול פריסות ← עיפרון ← גרסה חדשה).');return}}catch(e){alert('המחיקה נכשלה, נסו שוב.');return}
-  load()}
 function tog(s){open[s]=!open[s];load()}
 load();setInterval(load,10000);
 </script>
