@@ -36,7 +36,7 @@ const WORD='כוכבים',N=WORD.length,$=id=>document.getElementById(id);
 const HOLD=9000,UP=1/HOLD,DOWN=1/(HOLD*2);   // ~9 s of darkness to decode; slowly fades when light returns
 const cells=[...WORD].map(ch=>{const c=document.createElement('div');c.className='c';c.innerHTML='<i>●</i><b>'+ch+'</b>';$('cells').appendChild(c);return c});
 const cv=$('cv'),g2=cv.getContext('2d',{willReadFrequently:true}),v=$('v');
-let sky=0,hist=[],p=0,last=Date.now(),done=false,stream=null,t0=Date.now();
+let armed=false,sky=0,hist=[],p=0,last=Date.now(),done=false,stream=null,t0=Date.now();
 const meanLum=()=>{g2.drawImage(v,0,0,16,16);const d=g2.getImageData(0,0,16,16).data;let s=0;for(let i=0;i<d.length;i+=4)s+=.3*d[i]+.59*d[i+1]+.11*d[i+2];return s/256};
 function render(){cells.forEach((c,i)=>{const o=Math.max(0,Math.min(1,p*N-i));c.querySelector('b').style.opacity=o;c.querySelector('i').style.opacity=1-o});$('bar').firstChild.style.width=(p*100)+'%'}
 function tick(){
@@ -48,7 +48,8 @@ function tick(){
     const base=Math.max(40,...hist.map(h=>h[1]));
     const d=Math.max(1-l/base,l<12?1:0);
     sky=sky*0.6+Math.min(1,d/0.55)*0.4;$('bulb').style.filter='grayscale('+sky+') brightness('+(1-sky*0.65)+') drop-shadow(0 0 '+(16*(1-sky))+'px #FFD166)';
-    p=Math.max(0,Math.min(1,p+(d>=0.55?dt*UP:-dt*DOWN)));
+    if(l>=50)armed=true;   // decoding starts only after the camera has seen some light first (a phone lying face-up on a desk is already dark)
+    p=Math.max(0,Math.min(1,p+(armed&&d>=0.55?dt*UP:-dt*DOWN)));
     render();
     if(p>=1){finish();return}
   }
