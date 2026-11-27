@@ -66,8 +66,8 @@ async function load(){
 async function del(sid,name){
   if(!confirm('למחוק את "'+name+'" מהגיליון?\nאי אפשר לבטל (אפשר לשחזר רק מהיסטוריית הגרסאות של הגיליון).'))return;
   try{const r=await (await fetch(ENDPOINT+'?key='+encodeURIComponent(KEY)+'&del='+encodeURIComponent(sid))).json();
-    if(r.error==='nodel'){alert('צריך לעדכן את הקוד ב-Apps Script (פריסה חדשה), כדי שהמחיקה תעבוד.');return}
-    if(r.error){alert('שגיאה: '+r.error);return}}catch(e){alert('המחיקה נכשלה, נסו שוב.');return}
+    if(r.error){alert('שגיאה: '+r.error);return}
+    if(r.deleted===undefined){alert('הסקריפט בגיליון עדיין בגרסה הישנה. צריך להדביק את Code.gs החדש ולפרוס גרסה חדשה (פריסה ← ניהול פריסות ← עיפרון ← גרסה חדשה).');return}}catch(e){alert('המחיקה נכשלה, נסו שוב.');return}
   load()}
 function tog(s){open[s]=!open[s];load()}
 load();setInterval(load,10000);
