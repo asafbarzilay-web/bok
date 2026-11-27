@@ -5,6 +5,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
 <style>
+#pre{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:340px}
+#pre p{font-size:16px}
+.mock{background:#F2F5F4;color:#1E1B3A;border-radius:18px;padding:14px 16px;width:100%;text-align:right;font-size:14px}
+.mock .t{font-size:13px;opacity:.7;margin-bottom:8px}
+.opt{display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:10px 12px;margin-top:6px;background:#E8EAF6;font-weight:700}
+.opt.sel{outline:3px solid #FFD166;background:#DDE3FB}
+.opt .r{width:18px;height:18px;border-radius:50%;border:2px solid #2a5bd7;display:inline-block}
+.opt.sel .r{background:#2a5bd7}
+.opt small{display:block;font-weight:400;opacity:.65}
+#main{display:none;flex-direction:column;align-items:center;gap:18px}
 body{justify-content:center;min-height:100vh;gap:18px;transition:background .6s}
 #ball{width:210px;height:210px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:84px;transition:background .6s,box-shadow .6s;animation:beat 1.6s infinite}
 @keyframes beat{50%{transform:scale(1.06)}}
@@ -15,12 +25,21 @@ body{justify-content:center;min-height:100vh;gap:18px;transition:background .6s}
 .code{display:none}
 .code.show{display:block}
 </style></head><body>
+<div id="pre">
+  <p>המשחק צריך לדעת איפה אתם נמצאים.<br>כשיקפוץ חלון, בחרו <b>מדויק</b> ואשרו.</p>
+  <div class="mock"><div class="t">חלון ההרשאה בטלפון:</div>
+    <div class="opt sel"><span>מדויק<small>Precise</small></span><span class="r"></span></div>
+    <div class="opt"><span>בערך<small>Approximate</small></span><span class="r"></span></div></div>
+  <button class="btn" id="go">התחלה</button>
+</div>
+<div id="main">
 <div id="ball">🧭</div>
 <div id="word">מחפשים אות…</div>
 <div id="trend"></div>
 <div id="dist"></div>
 <div id="msg"></div>
 <div class="code" id="code">מילת הקוד<b>לוויין</b></div>
+</div>
 <script>
 const Q=new URLSearchParams(location.search);
 const TARGET={lat:32.080698,lon:34.816254};
@@ -46,12 +65,18 @@ function show(d,acc){
   if(sm<=R){hits++;if(hits>=2)win()}else hits=0}
 function win(){if(solved)return;solved=true;$('ball').textContent='🎯';$('ball').style.background='#3DDC84';$('ball').style.boxShadow='0 0 60px #3DDC84';
   $('word').textContent='הגעתם!';$('trend').textContent='';$('dist').textContent='';$('code').classList.add('show');confetti();try{navigator.vibrate&&navigator.vibrate([100,60,200])}catch(e){}}
-function onPos(p){if(solved)return;show(dist({lat:p.coords.latitude,lon:p.coords.longitude},TARGET),p.coords.accuracy||0)}
+let poor=0;
+function onPos(p){if(solved)return;const acc=p.coords.accuracy||0;
+  if(acc>80){poor++;if(poor>=3){$('word').textContent='המיקום לא מדויק';$('msg').textContent='בחרו "מדויק" (Precise) בהרשאת המיקום. באנדרואיד: סמל המנעול ליד הכתובת ← הרשאות ← מיקום ← מדויק. באייפון: הגדרות ← פרטיות ← שירותי מיקום ← Safari ← מיקום מדויק. ואז רעננו.';return}}else poor=0;
+  show(dist({lat:p.coords.latitude,lon:p.coords.longitude},TARGET),acc)}
 function onErr(e){$('word').textContent='אין מיקום';$('msg').textContent=e.code===1?'אין הרשאה למיקום. אשרו אותה בדפדפן (ובהגדרות הטלפון) ורעננו את הדף.':'לא מצליחים לקבל מיקום. נסו לצאת החוצה.'}
-const at=Q.get('at');
-if(at){const [la,lo]=at.split(',').map(Number);setInterval(()=>onPos({coords:{latitude:la,longitude:lo,accuracy:5}}),700)}   // test mode
-else if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
-else onErr({code:0});
+function begin(){$('pre').style.display='none';$('main').style.display='flex';
+  const at=Q.get('at');
+  if(at){const [la,lo]=at.split(',').map(Number);setInterval(()=>onPos({coords:{latitude:la,longitude:lo,accuracy:+Q.get('acc')||5}}),700)}   // test mode
+  else if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  else onErr({code:0})}
+$('go').onclick=begin;
+if(Q.get('at'))begin();
 function confetti(){const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99';document.body.appendChild(c);
   const W=c.width=innerWidth,H=c.height=innerHeight,g=c.getContext('2d'),C=['#8FD6C8','#FFD166','#FF9F80','#B8A6FF','#3DDC84','#F2F5F4'];
   const P=[...Array(140)].map(()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.55,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,s:Math.random()*8+5,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0]}));
