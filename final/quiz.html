@@ -253,7 +253,7 @@ function ask(){const i=S.cur;$('media').innerHTML=MEDIA[i];$('qs').textContent=S
   const V=VOICE[i];if(rec){try{rec.abort()}catch(e){}rec=null}$('voice').hidden=!V||!SR;$('vtype').hidden=true;$('mic').disabled=false;$('mic').className='btn';$('mic').textContent='🎤 לחצו ודברו';$('heard').textContent=V?(S.ans[i]?'🎧 '+S.ans[i]:''):'';$('ans').hidden=!!V&&!!SR;
   const F=FIELDS[i],pv=(S.ans[i]||'').split(' | ');$('ans2').hidden=!F;$('ans').placeholder=F?F[0]:'התשובה שלי';if(F)$('ans2').placeholder=F[1];
   $('ans').value=F?(pv[0]||''):(S.ans[i]||'');$('ans2').value=F?(pv[1]||''):'';$('fb').textContent='';$('fb').className='fb';$('chk').hidden=false;$('nx').hidden=true;$('sk').hidden=false;
-  if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);bar();if(!(V&&SR))setTimeout(()=>$('ans').focus(),50)}
+  if(S.res[i]===true||S.res[i]==='wait')done(S.res[i]);if(V&&SR)$('chk').hidden=true;bar();if(!(V&&SR))setTimeout(()=>$('ans').focus(),50)}
 function done(r){$('fb').textContent=r===true?'✅ נכון!':'📝 נרשם – המורה יבדוק';$('fb').className='fb '+(r===true?'ok':'wait');
   $('chk').hidden=true;$('sk').hidden=true;$('nx').hidden=false;$('mic').disabled=true;$('nx').focus()}
 function nextQ(){const order=[...Array(Q.length).keys()].map(k=>(S.cur+1+k)%Q.length);
@@ -271,7 +271,7 @@ $('chk').onclick=()=>{const i=S.cur,a=FIELDS[i]?$('ans').value.trim()+' | '+$('a
 $('ans2').onkeydown=e=>{if(e.key==='Enter')$('nx').hidden?$('chk').click():$('nx').click()};
 $('ans').onkeydown=e=>{if(e.key==='Enter'&&FIELDS[S.cur]&&!$('ans2').value.trim()){$('ans2').focus();return}if(e.key==='Enter'){$('nx').hidden?$('chk').click():$('nx').click()}};
 $('nx').onclick=nextQ;
-$('vtype').onclick=e=>{e.preventDefault();$('voice').hidden=true;$('ans').hidden=false;$('ans').focus()};
+$('vtype').onclick=e=>{e.preventDefault();$('voice').hidden=true;$('ans').hidden=false;$('chk').hidden=false;$('ans').focus()};
 $('mic').onclick=()=>{const i=S.cur;if(rec){try{rec.stop()}catch(e){}return}
   const rs=()=>{$('mic').className='btn';$('mic').textContent='🎤 נסו שוב'};
   rec=new SR();rec.lang=VOICE[i];rec.interimResults=true;rec.maxAlternatives=5;let best='',err='';
