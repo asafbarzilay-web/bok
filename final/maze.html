@@ -46,7 +46,7 @@ function step(){if(!run)return;vx=(vx+ax*.28)*.96;vy=(vy+ay*.28)*.96;
   if(!hit(x+vx,y))x+=vx;else vx*=-.3;
   if(!hit(x,y+vy))y+=vy;else vy*=-.3;
   hist.push({x,y});if(hist.length>400)hist.shift();
-  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<5.5){const b=hist[Math.max(0,hist.length-90)]||{x:28.5,y:28.5};x=b.x;y=b.y;hist.length=Math.max(0,hist.length-90);vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים קצת אחורה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
+  if(!won)for(const h of holes)if(Math.hypot(x-h.x,y-h.y)<5.5){x=28.5;y=28.5;hist.length=0;vx=vy=0;falls++;document.getElementById('msg').textContent='נפלתם לבור! חוזרים להתחלה ('+falls+')';try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}
   if(!won&&Math.hypot(x-goal.x,y-goal.y)<8){won=true;document.getElementById('code').style.display='block';try{navigator.vibrate&&navigator.vibrate([80,60,200])}catch(e){}}
   draw();requestAnimationFrame(step)}
 function draw(){g.clearRect(0,0,cv.width,cv.height);g.fillStyle='#8FD6C8';
