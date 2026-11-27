@@ -25,7 +25,7 @@ body{justify-content:center;min-height:100vh;gap:18px}
 <div class="code" id="code">נפתח! מילת הקוד:<b>גבינה</b></div>
 <script>
 const $=id=>document.getElementById(id),st=$('st'),ring=$('ring'),L=703.7;
-const TH=0.7,NEED=3;let done=false,streak=0,smooth=0,stream=null;
+const TH=0.7,HOLD=3000;let done=false,since=0,stream=null;   // must keep smiling for 3 seconds
 function setRing(p){ring.style.strokeDashoffset=L*(1-Math.max(0,Math.min(1,p)))}
 const load=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('load '+src));document.head.appendChild(s)});
 $('start').onclick=async()=>{
@@ -47,11 +47,11 @@ async function loop(){
   if(v.readyState>=2){
     try{
       const r=await faceapi.detectSingleFace(v,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.4})).withFaceExpressions();
-      const h=r?r.expressions.happy:0;
-      smooth=smooth*0.5+h*0.5;setRing(smooth/TH*0.95);
+      const h=r?r.expressions.happy:0,now=Date.now();
       st.textContent=r?'':'לא רואה פנים';
-      streak=h>=TH?streak+1:0;
-      if(streak>=NEED){unlock();return}
+      if(h>=TH){if(!since)since=now}else since=0;
+      setRing(since?(now-since)/HOLD:0);
+      if(since&&now-since>=HOLD){unlock();return}
     }catch(e){st.textContent='שגיאה: '+(e.message||e)}
   }
   setTimeout(loop,120)}

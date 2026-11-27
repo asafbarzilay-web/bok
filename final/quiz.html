@@ -199,7 +199,7 @@ const SONG=[];
 const YT_ID=new URLSearchParams(location.search).get('yt')||'iArXv64tCJA',YT_START=30,YT_LEN=25;
 const B='https://asafbarzilay-web.github.io/bok/final/';
 const MORSE=[['א','•▬'],['ה','▬▬▬'],['נ','▬•'],['ב','▬•••'],['ו','•'],['צ','•▬▬'],['ח','••••'],['ל','•▬••'],['ר','•▬•'],['ש','•••'],['מ','▬▬'],['ת','▬']];
-const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','לחצו על המיקרופון ודברו. המחשב מקשיב.','סרקו את הקוד.','המקלדת התקלקלה ואי אפשר ללחוץ על אותיות בודדות. סרקו את הקוד ונסו בכל זאת לכתוב את המילים.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','תרגיל מורס. סרקו, הרגישו, ופענחו. קצר = • ארוך = ▬ (רטט; באייפון: צליל)','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.','סרקו את הקוד.','סרקו את הקוד.','סרקו את הקוד.','הדליקו. סרקו את הקוד.'];
+const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','לחצו על המיקרופון ודברו. המחשב מקשיב.','סרקו את הקוד.','המקלדת התקלקלה ואי אפשר ללחוץ על אותיות בודדות. סרקו את הקוד ונסו בכל זאת לכתוב את המילים.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','תרגיל מורס. סרקו, הרגישו, ופענחו. קצר = • ארוך = ▬ (רטט; באייפון: צליל)','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.','סרקו את הקוד.','סרקו את הקוד. מה מילת הקוד?','הדליקו. סרקו את הקוד.'];
 const qr=f=>'<img class="qr" src="'+f+'" alt="QR">';
 const MEDIA=[
  '<img class="photo" src="flower.jpg" alt="">',
@@ -209,7 +209,7 @@ const MEDIA=[
  qr('qr-maze.png'),qr('qr-swipe.png'),qr('qr-sound.png'),
  '<img class="photo" src="building.jpg" alt="">',
  qr('qr-buzz.png')+'<div class="morse">'+MORSE.map(([l,c])=>'<span>'+l+' <b>'+c.split('').join(' ')+'</b></span>').join('')+'</div>',
- qr('qr-compass.png'),qr('qr-shake.png'),qr('qr-gps.png'),'<div style="font-size:60px;line-height:1">😊</div>'+qr('qr-smile.png'),'<div style="font-size:60px;line-height:1">🕎</div>'+qr('qr-candles.png')];
+ qr('qr-compass.png'),qr('qr-shake.png'),qr('qr-gps.png'),qr('qr-smile.png'),'<div style="font-size:60px;line-height:1">🕎</div>'+qr('qr-candles.png')];
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition,VOICE={3:'fi-FI'};let rec=null;
 let ytp=null,ytReady=false,ytTimer=null,ytErr=null;
 window.onYouTubeIframeAPIReady=()=>makePlayer();
@@ -225,7 +225,7 @@ const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1
 function log(ev,o){if(!ENDPOINT||!S||S.test)return;const d=Object.assign({sid:'Q'+S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
   try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)}).catch(()=>{})}catch(e){}}
 const FIELDS={2:['שם השיר','שנה']};
-const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","איפה השירותים? תגידו את זה בפינית.","מבוך – מה מילת הקוד?","המקלדת התקלקלה – מה מילת הקוד?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","תרגיל מורס – מה המילה?","מצפן – מה מילת הקוד?","תסדרו את מה שהתבלגן – מה קיבלתם?","חם קר – מה מילת הקוד?","תגלו איך לפתוח את נעילת המסך – מה מילת הקוד?","חנוכייה – מה מילת הקוד?"];
+const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","איפה השירותים? תגידו את זה בפינית.","מבוך – מה מילת הקוד?","המקלדת התקלקלה – מה מילת הקוד?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","תרגיל מורס – מה המילה?","מצפן – מה מילת הקוד?","תסדרו את מה שהתבלגן – מה קיבלתם?","חם קר – מה מילת הקוד?","האם תצליחו לפתוח את נעילת המסך? 😊","חנוכייה – מה מילת הקוד?"];
 const SHOW_GPS=true;   // set to false to hide question 12 (hot/cold) everywhere
 if(!SHOW_GPS){Q.splice(11,1);SUB.splice(11,1);MEDIA.splice(11,1)}
 const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJwYXJ0cyI6IFt7ImFsdCI6IFtbInlvdW5nIiwgImZvbGsiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyJdLCBbIteZ15DXoNeSIiwgItek15XXp9ehIl1dfSwgeyJhbHQiOiBbWyIyMDA2Il1dfV19LCAiNCI6IHsiYWx0IjogW1sibWlzIiwgInZlcyJdLCBbIm9uIiwgInZlcyJdLCBbIm1pcyIsICJ3YyJdLCBbIm9uIiwgIndjIl1dfSwgIjUiOiB7ImFueSI6IFsi16TXmdeg15LXldeV15nXnyIsICLXpNeZ16DXkteV15nXnyIsICJwZW5ndWluIl19LCAiNiI6IHsiYW55IjogWyLXk9eV15zXpNeZ158iLCAiZG9scGhpbiJdfSwgIjciOiB7ImFueSI6IFsi15DXkdeY15nXlyJdfSwgIjgiOiB7ImFueSI6IFsi16fXldeQ15zXlCIsICJrdWFsYSJdfSwgIjkiOiB7ImFueSI6IFsi157Xptec157XlCIsICLXntem15zXnteQIl19LCAiMTAiOiB7ImFueSI6IFsi16fXp9eY15XXoSIsICJjYWN0dXMiXX0sICIxMSI6IHsiYWxsIjogWyLXkNec16TXkCIsICLXqNee16oiLCAi15LXnyJdfSwgIjEyIjogeyJhbnkiOiBbItec15XXldeZ15nXnyIsICLXnNeV15nXmdefIiwgInNhdGVsbGl0ZSJdfSwgIjEzIjogeyJhbnkiOiBbIteS15HXmdeg15QiLCAiY2hlZXNlIl19LCAiMTQiOiB7ImFueSI6IFsi16HXldek15LXoNeZ15nXlCIsICLXodeV16TXkteg15nXlCJdfX0="),c=>c.charCodeAt(0))));
