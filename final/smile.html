@@ -22,7 +22,7 @@ body{justify-content:center;min-height:100vh;gap:18px}
 <div id="cam"><video id="v" playsinline muted autoplay></video>
 <svg viewBox="0 0 240 240"><circle cx="120" cy="120" r="112" fill="none" stroke="#2B2752" stroke-width="8"/><circle id="ring" cx="120" cy="120" r="112" fill="none" stroke="#8FD6C8" stroke-width="8" stroke-linecap="round" stroke-dasharray="703.7" stroke-dashoffset="703.7"/></svg></div>
 <div id="st"></div>
-<div class="code" id="code">נפתח! מילת הקוד:<b>גבינה</b></div>
+<div class="code" id="code">מילת הקוד:<b>גבינה</b></div>
 <script>
 const $=id=>document.getElementById(id),st=$('st'),ring=$('ring'),L=703.7;
 const TH=0.7,HOLD=3000;let done=false,since=0,stream=null;   // must keep smiling for 3 seconds
@@ -55,7 +55,7 @@ async function loop(){
     }catch(e){st.textContent='שגיאה: '+(e.message||e)}
   }
   setTimeout(loop,120)}
-function unlock(){done=true;setRing(1);ring.style.stroke='#3DDC84';$('lock').textContent='🔓';$('code').style.display='block';st.textContent='';
+function unlock(){done=true;$('cam').style.display='none';$('priv').style.display='none';$('lock').textContent='🔓';$('lock').style.fontSize='96px';document.querySelector('h1').textContent='המסך נפתח!';$('code').style.display='block';st.textContent='';
   try{navigator.vibrate&&navigator.vibrate([80,60,160])}catch(e){}
   try{stream.getTracks().forEach(t=>t.stop())}catch(e){}confetti()}
 function confetti(){const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99';document.body.appendChild(c);
