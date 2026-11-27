@@ -94,7 +94,7 @@ td{padding:6px;border-bottom:1px solid #3a3566}
  <path d="M300 205 L492 205 L500 206 L292 206Z" fill="#8a93a6"/>
  <rect x="312" y="88" width="168" height="117" rx="7" fill="#14122b" stroke="#5d5aa0" stroke-width="2"/>
  <rect x="322" y="98" width="148" height="97" rx="3" fill="#1E1B3A"/>
- <text x="396" y="116" text-anchor="middle" fill="#8FD6C8" font-size="11" font-weight="700">שאלה 3 מתוך 10</text>
+ <text x="396" y="116" text-anchor="middle" fill="#8FD6C8" font-size="11" font-weight="700">שאלה 3 מתוך 11</text>
  <rect x="332" y="126" width="58" height="58" rx="3" fill="#F2F5F4"/>
  <g fill="#14122b"><rect x="337" y="131" width="16" height="16"/><rect x="369" y="131" width="16" height="16"/><rect x="337" y="163" width="16" height="16"/><rect x="359" y="152" width="6" height="6"/><rect x="368" y="160" width="10" height="6"/><rect x="358" y="170" width="8" height="9"/><rect x="372" y="172" width="8" height="7"/></g>
  <rect x="402" y="132" width="58" height="18" rx="9" fill="none" stroke="#8FD6C8" stroke-width="1.2"/>
@@ -199,7 +199,7 @@ const SONG=[];
 const YT_ID=new URLSearchParams(location.search).get('yt')||'iArXv64tCJA',YT_START=30,YT_LEN=25;
 const B='https://asafbarzilay-web.github.io/bok/final/';
 const MORSE=[['א','•▬'],['ה','▬▬▬'],['נ','▬•'],['ב','▬•••'],['ו','•'],['צ','•▬▬'],['ח','••••'],['ל','•▬••'],['ר','•▬•'],['ש','•••'],['מ','▬▬'],['ת','▬']];
-const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','לחצו על המיקרופון ודברו. המחשב מקשיב.','סרקו את הקוד.','המקלדת התקלקלה ואי אפשר ללחוץ על אותיות בודדות. סרקו את הקוד ונסו בכל זאת לכתוב את המילים.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','תרגיל מורס. סרקו, הרגישו, ופענחו. קצר = • ארוך = ▬ (רטט; באייפון: צליל)','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.'];
+const SUB=['כתבו את השם שלו (באנגלית או בעברית).','כתבו את התרגום המלא.','לחצו ▶ ותנו לטלפון להקשיב.','לחצו על המיקרופון ודברו. המחשב מקשיב.','סרקו את הקוד.','המקלדת התקלקלה ואי אפשר ללחוץ על אותיות בודדות. סרקו את הקוד ונסו בכל זאת לכתוב את המילים.','סרקו את הקוד. 5 שלבים, הירוק זז בכל פעם.','','תרגיל מורס. סרקו, הרגישו, ופענחו. קצר = • ארוך = ▬ (רטט; באייפון: צליל)','סרקו את הקוד: צפון ← דרום ← מזרח ← מערב ← צפון.','סרקו את הקוד.'];
 const qr=f=>'<img class="qr" src="'+f+'" alt="QR">';
 const MEDIA=[
  '<img class="photo" src="flower.jpg" alt="">',
@@ -209,7 +209,7 @@ const MEDIA=[
  qr('qr-maze.png'),qr('qr-swipe.png'),qr('qr-sound.png'),
  '<img class="photo" src="building.jpg" alt="">',
  qr('qr-buzz.png')+'<div class="morse">'+MORSE.map(([l,c])=>'<span>'+l+' <b>'+c.split('').join(' ')+'</b></span>').join('')+'</div>',
- qr('qr-compass.png')];
+ qr('qr-compass.png'),qr('qr-shake.png')];
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition,VOICE={3:'fi-FI'};let rec=null;
 let ytp=null,ytReady=false,ytTimer=null,ytErr=null;
 window.onYouTubeIframeAPIReady=()=>makePlayer();
@@ -225,8 +225,8 @@ const ENDPOINT='https://script.google.com/macros/s/AKfycbyWv0CAcSiM_lUJn1j6ngdL1
 function log(ev,o){if(!ENDPOINT||!S||S.test)return;const d=Object.assign({sid:'Q'+S.sid,name:S.name,ev:ev,sec:Math.round((Date.now()-S.t0)/1000)},o||{});
   try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)}).catch(()=>{})}catch(e){}}
 const FIELDS={2:['שם השיר','שנה']};
-const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","איפה השירותים? תגידו את זה בפינית.","מבוך – מה מילת הקוד?","המקלדת התקלקלה – מה מילת הקוד?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","תרגיל מורס – מה המילה?","מצפן – מה מילת הקוד?"];
-const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJwYXJ0cyI6IFt7ImFsdCI6IFtbInlvdW5nIiwgImZvbGsiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyJdLCBbIteZ15DXoNeSIiwgItek15XXp9ehIl1dfSwgeyJhbHQiOiBbWyIyMDA2Il1dfV19LCAiNCI6IHsiYWx0IjogW1sibWlzIiwgInZlcyJdLCBbIm9uIiwgInZlcyJdLCBbIm1pcyIsICJ3YyJdLCBbIm9uIiwgIndjIl1dfSwgIjUiOiB7ImFueSI6IFsi16TXmdeg15LXldeV15nXnyIsICLXpNeZ16DXkteV15nXnyIsICJwZW5ndWluIl19LCAiNiI6IHsiYW55IjogWyLXk9eV15zXpNeZ158iLCAiZG9scGhpbiJdfSwgIjciOiB7ImFueSI6IFsi15DXkdeY15nXlyJdfSwgIjgiOiB7ImFueSI6IFsi16fXldeQ15zXlCIsICJrdWFsYSJdfSwgIjkiOiB7ImFueSI6IFsi157Xptec157XlCIsICLXntem15zXnteQIl19LCAiMTAiOiB7ImFueSI6IFsi16fXp9eY15XXoSIsICJjYWN0dXMiXX19"),c=>c.charCodeAt(0))));
+const Q=["איך קוראים לפרח הזה?","איך אומרים את זה בעברית?","איך קוראים לשיר? ובאיזו שנה הוא יצא?","איפה השירותים? תגידו את זה בפינית.","מבוך – מה מילת הקוד?","המקלדת התקלקלה – מה מילת הקוד?","קול יציב – מה מילת הקוד?","באיזו עיר נמצא הבניין הזה?","תרגיל מורס – מה המילה?","מצפן – מה מילת הקוד?","תסדרו את מה שהתבלגן – מה קיבלתם?"];
+const K=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("eyIxIjogeyJhbHQiOiBbWyLXodeX15zXkSIsICLXp9eV16MiXSwgWyJtb25rZXkiLCAib3JjaGlkIl0sIFsiZHJhY3VsYSJdLCBbIteT16jXp9eV15zXlCJdXX0sICIyIjogeyJhbHQiOiBbWyLXl9eq15XXnCIsICLXqdeV16DXkCIsICLXqdeg15kiXSwgWyLXl9eq15XXnCIsICLXqdeV16DXkNeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItec15Ag15DXldeU15EiLCAi16nXoNeZIl0sIFsi15fXqteV15wiLCAi15zXkCDXkNeV15TXkdeqIiwgItep16DXmSJdLCBbIteX16rXldecIiwgItee16rXoteRIiwgItep16DXmSJdLCBbImNhdCIsICJoYXRlIiwgIm1vbmRheSJdXX0sICIzIjogeyJwYXJ0cyI6IFt7ImFsdCI6IFtbInlvdW5nIiwgImZvbGsiXSwgWyLXmdeQ16DXkiIsICLXpNeV15zXpyJdLCBbIteZ15DXoNeSIiwgItek15XXp9ehIl1dfSwgeyJhbHQiOiBbWyIyMDA2Il1dfV19LCAiNCI6IHsiYWx0IjogW1sibWlzIiwgInZlcyJdLCBbIm9uIiwgInZlcyJdLCBbIm1pcyIsICJ3YyJdLCBbIm9uIiwgIndjIl1dfSwgIjUiOiB7ImFueSI6IFsi16TXmdeg15LXldeV15nXnyIsICLXpNeZ16DXkteV15nXnyIsICJwZW5ndWluIl19LCAiNiI6IHsiYW55IjogWyLXk9eV15zXpNeZ158iLCAiZG9scGhpbiJdfSwgIjciOiB7ImFueSI6IFsi15DXkdeY15nXlyJdfSwgIjgiOiB7ImFueSI6IFsi16fXldeQ15zXlCIsICJrdWFsYSJdfSwgIjkiOiB7ImFueSI6IFsi157Xptec157XlCIsICLXntem15zXnteQIl19LCAiMTAiOiB7ImFueSI6IFsi16fXp9eY15XXoSIsICJjYWN0dXMiXX0sICIxMSI6IHsiYWxsIjogWyLXkNec16TXkCIsICLXqNee16oiLCAi15LXnyJdfX0="),c=>c.charCodeAt(0))));
 const norm=s=>s.toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[ךםןףץ]/g,c=>({'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'}[c])).replace(/[^א-תa-z0-9.,]/g,'');
 function rule(k,a){const n=norm(a);if(k.alt)return k.alt.some(g=>g.every(w=>n.includes(norm(w))));if(k.all)return k.all.every(w=>n.includes(norm(w)));return k.any.some(w=>n.includes(norm(w)))}
 function partsOf(i,a){const k=K[i+1];const v=a.split(' | ');return k.parts.map((p,j)=>!!(v[j]&&norm(v[j]))&&rule(p,v[j]))}
