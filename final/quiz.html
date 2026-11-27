@@ -188,8 +188,8 @@ td{padding:6px;border-bottom:1px solid #3a3566}
 <div class="card" id="fbk" hidden>
   <div class="q">עוד רגע וסיימתם 🙂 קצת משוב על הקורס</div>
   <p class="small" style="margin:6px 0 10px">הכל אופציונלי. אפשר לכתוב כמה מילים.</p>
-  <label class="fl">איך היה?</label><textarea id="f1" rows="2"></textarea>
-  <label class="fl">מה היית משפר?</label><textarea id="f2" rows="2"></textarea>
+  <label class="fl">מה היה טוב?</label><textarea id="f1" rows="2"></textarea>
+  <label class="fl">מה צריך לשפר?</label><textarea id="f2" rows="2"></textarea>
   <label class="fl">מה למדת?</label><textarea id="f3" rows="2"></textarea>
   <button class="btn" id="fsend" style="margin-top:12px">סיום</button>
 </div>
@@ -303,7 +303,7 @@ function finish(){stopSong();if(!S.t1){S.t1=Date.now();log('finish',{r:S.res.fil
   const m=Math.round((S.t1-S.t0)/60000);$('tm').textContent='זמן: '+m+' דקות'+(w?' · שאלה אחת מחכה לבדיקת המורה':'');
   $('tbl').innerHTML=Q.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+(S.res[i]===true?'✅':S.res[i]==='wait'?'📝':'⬜')+'</td><td>'+(S.ans[i]?S.ans[i].replace(/</g,'&lt;'):'—')+'</td></tr>').join('');
   $('back').hidden=!Q.some((_,i)=>S.res[i]!==true&&S.res[i]!=='wait')}
-$('fsend').onclick=()=>{[['f1','איך היה?'],['f2','מה היית משפר?'],['f3','מה למדת?']].forEach(([id,q])=>{const v=$(id).value.trim();if(v)log('feedback',{q:q,a:v})});S.fb=1;save();show('end');scrollTo(0,0)};
+$('fsend').onclick=()=>{[['f1','מה היה טוב?'],['f2','מה צריך לשפר?'],['f3','מה למדת?']].forEach(([id,q])=>{const v=$(id).value.trim();if(v)log('feedback',{q:q,a:v})});S.fb=1;save();show('end');scrollTo(0,0)};
 $('back').onclick=()=>{S.skipped=[];S.review=true;S.t1=null;const n=Q.findIndex((_,i)=>S.res[i]!==true&&S.res[i]!=='wait');S.cur=n;save();show('quiz');ask()};
 function reset(e){e.preventDefault();if(confirm('להתחיל מההתחלה עם שם אחר?')){try{localStorage.removeItem('tel_quiz')}catch(x){}location.reload()}}
 $('rst').onclick=reset;
