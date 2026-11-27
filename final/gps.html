@@ -69,11 +69,15 @@ let poor=0;
 function onPos(p){if(solved)return;const acc=p.coords.accuracy||0;
   if(acc>80){poor++;if(poor>=3){$('word').textContent='המיקום לא מדויק';$('msg').textContent='בחרו "מדויק" (Precise) בהרשאת המיקום. באנדרואיד: סמל המנעול ליד הכתובת ← הרשאות ← מיקום ← מדויק. באייפון: הגדרות ← פרטיות ← שירותי מיקום ← Safari ← מיקום מדויק. ואז רעננו.';return}}else poor=0;
   show(dist({lat:p.coords.latitude,lon:p.coords.longitude},TARGET),acc)}
-function onErr(e){$('word').textContent='אין מיקום';$('msg').textContent=e.code===1?'אין הרשאה למיקום. אשרו אותה בדפדפן (ובהגדרות הטלפון) ורעננו את הדף.':'לא מצליחים לקבל מיקום. נסו לצאת החוצה.'}
+let wid=null,gotFix=false;
+function onErr(e){
+  if(e.code===3||e.code===2){$('msg').textContent='עדיין אין אות GPS. צאו החוצה לשטח פתוח והמתינו כמה שניות…';watch();return}
+  $('word').textContent='אין מיקום';$('msg').textContent=e.code===1?'אין הרשאה למיקום. אשרו אותה בדפדפן (ובהגדרות הטלפון) ורעננו את הדף.':'לא מצליחים לקבל מיקום. נסו לצאת החוצה.'}
+function watch(){if(wid!==null)navigator.geolocation.clearWatch(wid);wid=navigator.geolocation.watchPosition(p=>{gotFix=true;onPos(p)},onErr,{enableHighAccuracy:true,maximumAge:5000,timeout:30000})}
 function begin(){$('pre').style.display='none';$('main').style.display='flex';
   const at=Q.get('at');
   if(at){const [la,lo]=at.split(',').map(Number);setInterval(()=>onPos({coords:{latitude:la,longitude:lo,accuracy:+Q.get('acc')||5}}),700)}   // test mode
-  else if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  else if(navigator.geolocation){watch();setTimeout(()=>{if(!gotFix&&!solved)$('msg').textContent='מחפשים אות GPS… אם אתם בתוך הבניין, צאו החוצה לשטח פתוח.'},6000)}
   else onErr({code:0})}
 $('go').onclick=begin;
 if(Q.get('at'))begin();
