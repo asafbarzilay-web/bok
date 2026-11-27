@@ -11,6 +11,9 @@ body{justify-content:center;min-height:100vh;gap:16px}
 .c{width:46px;height:62px;border-radius:10px;background:#2B2752;border:2px solid #3b3670;display:flex;align-items:center;justify-content:center;font:900 34px Heebo,Arial;color:#FFD166;position:relative;overflow:hidden}
 .c i{position:absolute;font-style:normal;color:#5d5aa0;font-size:26px}
 .c b{position:relative;opacity:0}
+#sky{position:relative;width:84px;height:84px;font-size:68px;line-height:84px}
+#sky span{position:absolute;inset:0;transition:opacity .25s}
+#moon{opacity:0}
 #bar{width:280px;height:6px;border-radius:3px;background:#2B2752;overflow:hidden}
 #bar div{height:100%;width:0;background:#8FD6C8;transition:width .15s linear}
 #st{font-size:15px;opacity:.75;min-height:22px}
@@ -21,6 +24,7 @@ body{justify-content:center;min-height:100vh;gap:16px}
 <div class="small" id="priv">הדף משתמש במצלמה. שום תמונה לא נשמרת ולא נשלחת לשום מקום.</div>
 <button class="btn" id="start">התחלה</button>
 <h1>יש כאן הודעה</h1>
+<div id="sky"><span id="sun">☀️</span><span id="moon">🌙</span></div>
 <div id="cells"></div>
 <div id="bar"><div></div></div>
 <div id="st"></div>
@@ -33,7 +37,7 @@ const WORD='כוכבים',N=WORD.length,$=id=>document.getElementById(id);
 const HOLD=9000,UP=1/HOLD,DOWN=1/(HOLD*2);   // ~9 s of darkness to decode; slowly fades when light returns
 const cells=[...WORD].map(ch=>{const c=document.createElement('div');c.className='c';c.innerHTML='<i>●</i><b>'+ch+'</b>';$('cells').appendChild(c);return c});
 const cv=$('cv'),g2=cv.getContext('2d',{willReadFrequently:true}),v=$('v');
-let hist=[],p=0,last=Date.now(),done=false,stream=null,t0=Date.now();
+let sky=0,hist=[],p=0,last=Date.now(),done=false,stream=null,t0=Date.now();
 const meanLum=()=>{g2.drawImage(v,0,0,16,16);const d=g2.getImageData(0,0,16,16).data;let s=0;for(let i=0;i<d.length;i+=4)s+=.3*d[i]+.59*d[i+1]+.11*d[i+2];return s/256};
 function render(){cells.forEach((c,i)=>{const o=Math.max(0,Math.min(1,p*N-i));c.querySelector('b').style.opacity=o;c.querySelector('i').style.opacity=1-o});$('bar').firstChild.style.width=(p*100)+'%'}
 function tick(){
@@ -44,11 +48,12 @@ function tick(){
     hist.push([now,l]);while(hist.length&&now-hist[0][0]>5000)hist.shift();
     const base=Math.max(40,...hist.map(h=>h[1]));
     const d=Math.max(1-l/base,l<12?1:0);
+    sky=sky*0.6+Math.min(1,d/0.55)*0.4;$('sun').style.opacity=1-sky;$('moon').style.opacity=sky;
     p=Math.max(0,Math.min(1,p+(d>=0.55?dt*UP:-dt*DOWN)));
     render();
     if(p>=1){finish();return}
   }
-  const s=(now-t0)/1000;if(s>25)$('cdot').classList.add('show');if(s>60&&p===0)$('st').textContent='ההודעה מרגישה את האור סביבה';
+  const s=(now-t0)/1000;if(s>20)$('cdot').classList.add('show');if(s>45&&p===0)$('st').textContent='ההודעה מתעוררת רק בלילה';
   setTimeout(tick,100)}
 function finish(){done=true;render();$('code').style.display='block';$('cdot').classList.remove('show');try{navigator.vibrate&&navigator.vibrate([80,60,160])}catch(e){}try{stream.getTracks().forEach(t=>t.stop())}catch(e){}confetti()}
 $('start').onclick=async()=>{
